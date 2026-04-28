@@ -164,6 +164,154 @@ const STUDY_RULES = {
   }
 };
 
+const PROJECT_TYPE_GUIDANCE = {
+  TFG: [
+    'Delimitar bien la pregunta de investigación para mantener foco y viabilidad.',
+    'Ajustar el alcance a un trabajo realista para el tiempo y recursos disponibles.',
+    'Priorizar una metodología sencilla, clara y ejecutable.',
+    'Definir objetivos medibles y verificables en el cronograma académico.',
+    'Construir un cronograma ajustado con hitos alcanzables.',
+    'Evitar proyectos demasiado ambiciosos para el nivel y plazo del TFG.'
+  ],
+  TFM: [
+    'Aportar una mayor profundidad metodológica y justificar cada decisión técnica.',
+    'Desarrollar una justificación teórica y contextual más robusta.',
+    'Planificar un análisis más sólido, coherente con objetivos y variables.',
+    'Valorar una revisión bibliográfica estructurada o un estudio observacional bien delimitado.',
+    'Comprobar coherencia explícita entre objetivos, variables y estrategia de análisis.'
+  ],
+  'Tesis doctoral': [
+    'Sustentar el trabajo en una línea de investigación sólida y acumulativa.',
+    'Jerarquizar objetivos principales y secundarios de forma explícita.',
+    'Diseñar un plan de publicaciones alineado con los objetivos doctorales.',
+    'Estructurar un cronograma plurianual con fases y entregables.',
+    'Valorar un paquete de estudios coordinados si el problema lo requiere.',
+    'Justificar factibilidad, originalidad e impacto potencial del programa de investigación.'
+  ],
+  'Protocolo CEI/CEIm': [
+    'Redactar un resumen claro del estudio, su finalidad y su procedimiento.',
+    'Incluir justificación científica explícita y actualizada.',
+    'Argumentar de forma proporcionada el balance riesgo-beneficio.',
+    'Incluir consentimiento informado o justificar técnicamente su exención.',
+    'Detallar medidas de protección de datos.',
+    'Definir anonimización o pseudonimización según proceda.',
+    'Preparar hoja de información al participante cuando corresponda.',
+    'Confirmar autorización del centro si la ejecución lo requiere.'
+  ],
+  'Artículo científico': [
+    'Plantear una pregunta clara y metodológicamente respondible.',
+    'Alinear diseño y reporte con guías EQUATOR aplicables.',
+    'Organizar el manuscrito con estructura IMRaD.',
+    'No inventar resultados ni anticipar hallazgos no observados.',
+    'Explicitar limitaciones metodológicas y de validez externa.',
+    'Mantener transparencia metodológica para permitir reproducibilidad.',
+    'Seleccionar revista objetivo en fase posterior, tras consolidar el manuscrito.'
+  ],
+  Otro: [
+    'Concretar la finalidad del proyecto y su utilidad esperada.',
+    'Definir la audiencia destinataria principal.',
+    'Delimitar alcance, entregables y productos esperados.',
+    'Establecer criterios explícitos de evaluación del resultado final.'
+  ]
+};
+
+const SAMPLE_SIZE_GUIDANCE = {
+  'Observacional transversal': {
+    intro: 'Orientación inicial: para justificar el tamaño muestral en un estudio observacional transversal suelen requerirse supuestos explícitos.',
+    points: [
+      'Variable principal.',
+      'Prevalencia/proporción esperada o media esperada.',
+      'Precisión deseada.',
+      'Nivel de confianza.',
+      'Población accesible.',
+      'Pérdidas o datos incompletos esperados.'
+    ]
+  },
+  Cohorte: {
+    intro: 'Orientación inicial: en cohortes, la justificación muestral suele apoyarse en supuestos de evento, exposición y seguimiento.',
+    points: [
+      'Incidencia esperada del evento.',
+      'Tamaño del efecto esperado.',
+      'Proporción de expuestos/no expuestos.',
+      'Tiempo de seguimiento.',
+      'Pérdidas esperadas.',
+      'Potencia y alfa.'
+    ]
+  },
+  'Casos y controles': {
+    intro: 'Orientación inicial: en casos y controles, la muestra suele justificarse con parámetros de exposición y efecto mínimo relevante.',
+    points: [
+      'Proporción de exposición en controles.',
+      'Odds ratio mínima relevante.',
+      'Ratio casos:controles.',
+      'Potencia y alfa.',
+      'Disponibilidad real de casos.'
+    ]
+  },
+  'Ensayo clínico': {
+    intro: 'Orientación inicial: el ensayo clínico requiere cálculo formal previo y validación metodológica/estadística específica.',
+    points: [
+      'Variable principal.',
+      'Diferencia mínima clínicamente relevante.',
+      'Desviación estándar o proporción esperada.',
+      'Potencia.',
+      'Alfa.',
+      'Pérdidas esperadas.',
+      'Asignación entre grupos.'
+    ],
+    alerts: [
+      'Debe ser revisado por un metodólogo/estadístico y puede requerir registro del ensayo.'
+    ]
+  },
+  Cualitativo: {
+    intro: 'Orientación inicial: en estudios cualitativos no se aplica cálculo por potencia estadística clásica.',
+    points: [
+      'Saturación teórica o informativa.',
+      'Diversidad de perfiles.',
+      'Profundidad de entrevistas/grupos.',
+      'Factibilidad y riqueza del discurso.'
+    ]
+  },
+  'Revisión sistemática': {
+    intro: 'Orientación inicial: en revisión sistemática no aplica tamaño muestral de participantes.',
+    points: [
+      'Alcance de la búsqueda.',
+      'Bases de datos.',
+      'Periodo temporal.',
+      'Criterios de inclusión.',
+      'Proceso de cribado.'
+    ]
+  },
+  'Scoping review': {
+    intro: 'Orientación inicial: en scoping review no aplica tamaño muestral clásico de participantes.',
+    points: [
+      'Amplitud de la pregunta.',
+      'Criterios PCC.',
+      'Fuentes de información.',
+      'Estrategia de mapeo.'
+    ]
+  },
+  Delphi: {
+    intro: 'Orientación inicial: en Delphi, el tamaño del panel se justifica por representatividad experta y estabilidad del consenso.',
+    points: [
+      'Perfil experto.',
+      'Heterogeneidad del panel.',
+      'Número de áreas representadas.',
+      'Número de rondas.',
+      'Estabilidad del consenso.',
+      'Pérdidas entre rondas.'
+    ]
+  },
+  general: {
+    intro: 'Orientación inicial general: antes de justificar tamaño muestral conviene definir con precisión el diseño del estudio.',
+    points: [
+      'Definir el diseño metodológico principal.',
+      'Precisar variable principal y población accesible.',
+      'Consultar validación metodológica/estadística antes del protocolo final.'
+    ]
+  }
+};
+
 function selectedRadio(name) {
   const input = form.querySelector(`input[name="${name}"]:checked`);
   return input ? input.value : '';
@@ -285,6 +433,58 @@ function buildImprovementRecommendations(values, studyType, assessment) {
   return recommendations;
 }
 
+function buildProjectTypeGuidance(projectType) {
+  const points = PROJECT_TYPE_GUIDANCE[projectType] || PROJECT_TYPE_GUIDANCE.Otro;
+  return {
+    projectType: projectType || 'Otro',
+    points
+  };
+}
+
+function buildSampleSizeGuidance(values, studyType) {
+  const guidance = studyType === 'No lo sé'
+    ? SAMPLE_SIZE_GUIDANCE.general
+    : (SAMPLE_SIZE_GUIDANCE[studyType] || SAMPLE_SIZE_GUIDANCE.general);
+  const alerts = [];
+
+  if (!values.mainVariable) {
+    alerts.push('No puede orientarse adecuadamente el tamaño muestral sin una variable principal clara.');
+  }
+  if (!values.population) {
+    alerts.push('Debe concretarse la población accesible o marco muestral.');
+  }
+  if (values.studyType === 'No lo sé' || !values.studyType) {
+    alerts.push('Se recomienda definir primero el diseño del estudio para orientar el tamaño muestral de forma pertinente.');
+  }
+  if (guidance.alerts) {
+    alerts.push(...guidance.alerts);
+  }
+
+  return {
+    intro: guidance.intro,
+    points: guidance.points,
+    alerts
+  };
+}
+
+function buildMissingCriticalElements(values) {
+  const missing = [];
+
+  if (!values.idea) missing.push('Falta idea inicial.');
+  if (!values.population) missing.push('Falta población.');
+  if (!values.mainVariable) missing.push('Falta variable principal.');
+  if (!values.studyType) missing.push('Falta diseño.');
+  if (!values.personalData && !values.vulnerable) missing.push('Falta información ética.');
+  if (!values.personalData) missing.push('Falta aclarar si hay datos personales.');
+  if (!values.vulnerable) missing.push('Falta aclarar si hay participantes vulnerables.');
+
+  if (!missing.length) {
+    missing.push('Los elementos iniciales esenciales están definidos, aunque deben revisarse con el tutor o equipo metodológico.');
+  }
+
+  return missing;
+}
+
 function buildDraft(values) {
   const warnings = [];
   const ethicsAlerts = [];
@@ -349,6 +549,9 @@ function buildDraft(values) {
   if (assessment.ethicsWarning) ethicsAlerts.push(assessment.ethicsWarning);
 
   const recommendations = buildImprovementRecommendations(values, studyType, assessment);
+  const projectTypeGuidance = buildProjectTypeGuidance(values.projectType);
+  const sampleSizeGuidance = buildSampleSizeGuidance(values, values.studyType);
+  const missingCriticalElements = buildMissingCriticalElements(values);
 
   const checklist = [
     'La pregunta de investigación está delimitada y es coherente con el diseño propuesto.',
@@ -376,7 +579,10 @@ function buildDraft(values) {
     ethicsAlerts,
     assessment,
     recommendations,
-    checklist
+    checklist,
+    projectTypeGuidance,
+    sampleSizeGuidance,
+    missingCriticalElements
   };
 }
 
@@ -425,13 +631,27 @@ function formatDraft(data, values) {
     `Semáforo: ${data.assessment.color}`,
     data.assessment.judgment,
     '',
-    '12. Recomendaciones para mejorar antes de enviar al tutor o comité',
+    '12. Orientación específica según tipo de proyecto',
+    `Tipo de proyecto orientado: ${data.projectTypeGuidance.projectType}`,
+    ...data.projectTypeGuidance.points.map((item, idx) => `${idx + 1}. ${item}`),
+    '',
+    '13. Orientación inicial sobre tamaño muestral',
+    data.sampleSizeGuidance.intro,
+    ...data.sampleSizeGuidance.points.map((item, idx) => `${idx + 1}. ${item}`),
+    ...(data.sampleSizeGuidance.alerts.length
+      ? ['', 'Alertas y prudencia metodológica:', ...data.sampleSizeGuidance.alerts.map((item, idx) => `${idx + 1}. ${item}`)]
+      : []),
+    '',
+    '14. Elementos críticos que faltan',
+    ...data.missingCriticalElements.map((item, idx) => `${idx + 1}. ${item}`),
+    '',
+    '15. Recomendaciones para mejorar antes de enviar al tutor o comité',
     ...data.recommendations.map((item, idx) => `${idx + 1}. ${item}`),
     '',
-    '13. Checklist previo al envío',
+    '16. Checklist previo al envío',
     ...data.checklist.map((item, idx) => `[ ] ${idx + 1}. ${item}`),
     '',
-    'Nota: Este borrador es orientativo; no sustituye la evaluación metodológica, estadística ni ética formal.'
+    'Nota: Este borrador ofrece orientación inicial y requiere validación con tutor, metodólogo y/o estadístico según el caso. No sustituye la evaluación metodológica, estadística ni ética formal.'
   ];
 
   return lines.join('\n');

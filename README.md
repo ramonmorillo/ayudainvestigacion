@@ -31,6 +31,9 @@ Incluye un flujo guiado de 8 pasos y genera automáticamente:
 - Nueva sección de **Valoración metodológica inicial** (rojo/amarillo/verde).
 - Nueva sección de **Recomendaciones para mejorar antes de enviar al tutor o comité**.
 - Estructura de salida ampliada a 13 apartados académicos.
+- Nueva sección de **Orientación específica según tipo de proyecto** (TFG, TFM, tesis doctoral, protocolo CEI/CEIm, artículo científico y otros).
+- Nueva sección de **Orientación inicial sobre tamaño muestral** adaptada al diseño, sin cálculos estadísticos automáticos ni resultados definitivos.
+- Nueva sección de **Elementos críticos que faltan** para reforzar calidad mínima de entrada.
 
 ## Cómo usar
 
@@ -72,7 +75,7 @@ Como el proyecto es estático (HTML/CSS/JS), se puede publicar directamente:
 
 ## Estado
 
-- **v0.2 en desarrollo** (motor metodológico por reglas implementado).
+- **v0.3 en desarrollo** (módulos específicos por tipo de proyecto y orientación inicial de tamaño muestral).
 
 ## Estructura
 

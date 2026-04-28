@@ -12,17 +12,22 @@
 - Recomendaciones de mejora según campos incompletos y coherencia del diseño.
 - Estructura de salida académica ampliada a 13 apartados.
 
-## v0.3 · Exportación Markdown/Word
+## v0.3 · Módulos específicos y tamaño muestral orientativo (implementado)
+- Orientación específica según tipo de proyecto: TFG, TFM, tesis doctoral, protocolo CEI/CEIm, artículo científico y otros.
+- Orientación inicial sobre tamaño muestral por tipo de estudio, con lenguaje prudente y sin cálculo estadístico automático.
+- Nueva sección de elementos críticos faltantes para reforzar completitud metodológica y ética inicial.
+
+## v0.4 · Exportación Markdown/Word
 - Exportación del borrador en formato `.md`.
 - Plantilla `.doc`/`.docx` descargable (estructura para tutor/tribunal).
 - Ajustes de formato para impresión.
 
-## v0.4 · Checklist metodológico avanzado
+## v0.5 · Checklist metodológico avanzado
 - Checklists específicos por diseño (cohorte, casos-controles, cualitativo, etc.).
 - Validaciones mínimas para consistencia entre objetivo, variable y población.
 - Recomendaciones de reporting (STROBE, CONSORT, PRISMA, SRQR...).
 
-## v0.5 · Módulos por tipo de estudio
+## v0.6 · Módulos por tipo de estudio
 - Módulo de revisión sistemática/scoping review.
 - Módulo de investigación clínica observacional.
 - Módulo cualitativo.
