@@ -1,20 +1,36 @@
-# AyudaInvestigacion (MVP v0.1)
+# AyudaInvestigacion (v0.2 en desarrollo)
 
 AyudaInvestigacion es una herramienta web gratuita para ayudar a estudiantes e investigadores noveles a crear el borrador inicial de proyectos de investigación (TFG, TFM, tesis, protocolos y estudios sanitarios/académicos).
 
 ## Descripción
 
-Esta primera versión funciona 100% en navegador y sin backend.
+La versión actual funciona 100% en navegador y sin backend.
 Incluye un flujo guiado de 8 pasos y genera automáticamente:
 
 - Título provisional.
 - Pregunta de investigación inicial.
-- Objetivo general.
-- 3 objetivos específicos.
+- Justificación breve y objetivos.
 - Diseño metodológico sugerido.
-- Variables mínimas recomendadas.
+- Variables principales/secundarias por tipo de estudio.
+- Análisis preliminar adaptado por reglas metodológicas.
 - Alertas metodológicas y éticas básicas.
-- Checklist previo a revisión por tutor o comité ético.
+- Valoración metodológica inicial (semáforo).
+- Recomendaciones de mejora y checklist previo al envío.
+
+## Novedades v0.2
+
+- Motor metodológico por reglas en `script.js` para adaptar el borrador según el tipo de estudio:
+  - Observacional transversal
+  - Cohorte
+  - Casos y controles
+  - Ensayo clínico
+  - Cualitativo
+  - Revisión sistemática
+  - Scoping review
+  - Delphi
+- Nueva sección de **Valoración metodológica inicial** (rojo/amarillo/verde).
+- Nueva sección de **Recomendaciones para mejorar antes de enviar al tutor o comité**.
+- Estructura de salida ampliada a 13 apartados académicos.
 
 ## Cómo usar
 
@@ -56,13 +72,13 @@ Como el proyecto es estático (HTML/CSS/JS), se puede publicar directamente:
 
 ## Estado
 
-- **MVP v0.1** (funcional inicial).
+- **v0.2 en desarrollo** (motor metodológico por reglas implementado).
 
 ## Estructura
 
 - `index.html` interfaz principal.
 - `styles.css` estilos responsive.
-- `script.js` lógica del formulario y motor de reglas.
+- `script.js` lógica del formulario y motor metodológico por reglas.
 - `ROADMAP.md` fases de evolución.
 - `docs/metodologia.md` guía metodológica breve.
 - `docs/etica.md` guía ética básica.

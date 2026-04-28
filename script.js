@@ -8,6 +8,162 @@ const progressText = document.getElementById('progressText');
 const progressPercent = document.getElementById('progressPercent');
 const totalSteps = 8;
 
+const STUDY_RULES = {
+  'Observacional transversal': {
+    design: 'Estudio observacional de corte transversal, con finalidad descriptiva y/o analítica según la pregunta.',
+    variables: [
+      'Variable principal (resultado o condición de interés).',
+      'Variables sociodemográficas relevantes (edad, sexo, nivel educativo u otras pertinentes).',
+      'Variables clínicas o contextuales relacionadas con el problema.',
+      'Posibles factores asociados o de confusión a considerar.'
+    ],
+    analysis: [
+      'Análisis descriptivo de la muestra y de la variable principal.',
+      'Comparación entre grupos si procede (según naturaleza de variables y distribución).',
+      'Modelo de regresión lineal o logística según el tipo de variable principal.'
+    ],
+    alerts: [
+      'Evitar inferencias causales: el diseño transversal no permite establecer causalidad temporal.',
+      'Definir de forma explícita criterios de inclusión y exclusión.',
+      'Justificar la fuente de datos y su calidad.'
+    ]
+  },
+  Cohorte: {
+    design: 'Estudio observacional longitudinal de cohortes para evaluar la asociación entre exposición y resultado en el tiempo.',
+    variables: [
+      'Exposición principal de interés.',
+      'Resultado principal (evento, condición o cambio clínicamente relevante).',
+      'Tiempo de seguimiento y puntos de medición.',
+      'Factores de confusión y covariables relevantes.'
+    ],
+    analysis: [
+      'Estimación de incidencia acumulada y/o densidad de incidencia.',
+      'Cálculo de riesgo relativo y/o hazard ratio si procede.',
+      'Análisis multivariante para ajuste de confusión.'
+    ],
+    alerts: [
+      'Controlar y documentar pérdidas durante el seguimiento.',
+      'Definir con precisión el periodo de observación.',
+      'Implementar estrategias para minimizar sesgo de selección.'
+    ]
+  },
+  'Casos y controles': {
+    design: 'Estudio observacional analítico de casos y controles para explorar asociaciones entre exposiciones previas y evento de interés.',
+    variables: [
+      'Definición operativa y reproducible de caso.',
+      'Definición de control y criterios de comparabilidad.',
+      'Exposición previa principal y forma de medición.',
+      'Factores de confusión potenciales.'
+    ],
+    analysis: [
+      'Estimación de odds ratio cruda y ajustada.',
+      'Análisis bivariante inicial.',
+      'Análisis multivariante para control de confusión.'
+    ],
+    alerts: [
+      'Valorar riesgo de sesgo de memoria y/o sesgo de registro.',
+      'Asegurar comparabilidad estructural entre casos y controles.',
+      'Justificar claramente el procedimiento de selección de controles.'
+    ]
+  },
+  'Ensayo clínico': {
+    design: 'Estudio experimental con asignación de intervención y comparador para evaluar eficacia, efectividad o seguridad.',
+    variables: [
+      'Intervención principal y protocolo de aplicación.',
+      'Comparador (atención habitual, placebo u otra intervención).',
+      'Resultado principal con definición clínica explícita.',
+      'Eventos adversos y variables de seguridad.'
+    ],
+    analysis: [
+      'Análisis por intención de tratar si procede según el diseño.',
+      'Comparación entre grupos para resultado principal y secundarios.',
+      'Análisis de seguridad y de sensibilidad cuando sea pertinente.'
+    ],
+    alerts: [
+      'Requiere evaluación ética reforzada antes de su ejecución.',
+      'Valorar registro del ensayo en plataforma reconocida.',
+      'Describir procedimiento de consentimiento informado.',
+      'Incluir cálculo formal del tamaño muestral.'
+    ]
+  },
+  Cualitativo: {
+    design: 'Estudio cualitativo exploratorio orientado a comprender significados, procesos y experiencias.',
+    variables: [
+      'Fenómeno de interés y unidad de análisis.',
+      'Participantes y criterios de selección.',
+      'Contexto de producción de la información.',
+      'Dimensiones temáticas iniciales para guiar la recogida de datos.'
+    ],
+    analysis: [
+      'Análisis temático o de contenido con codificación explícita.',
+      'Triangulación de fuentes, analistas o técnicas si procede.',
+      'Trazabilidad del proceso analítico y reflexividad del equipo investigador.'
+    ],
+    alerts: [
+      'Justificar criterio de saturación teórica.',
+      'Describir estrategia de muestreo cualitativo.',
+      'Asegurar consentimiento, confidencialidad y tratamiento ético de narrativas.'
+    ]
+  },
+  'Revisión sistemática': {
+    design: 'Revisión sistemática de la literatura con pregunta estructurada y proceso reproducible.',
+    variables: [
+      'Pregunta estructurada (PICO o PEO, según corresponda).',
+      'Bases de datos y fuentes de información a consultar.',
+      'Criterios de inclusión y exclusión predefinidos.',
+      'Estrategia de búsqueda reproducible y proceso de selección por pares.',
+      'Evaluación de calidad metodológica/riesgo de sesgo de los estudios incluidos.'
+    ],
+    analysis: [
+      'Síntesis narrativa estructurada.',
+      'Metaanálisis si procede por homogeneidad clínica y metodológica.'
+    ],
+    alerts: [
+      'Seguir guía PRISMA para reporte transparente.',
+      'Valorar registro de protocolo antes de iniciar la revisión.',
+      'Habitualmente no requiere CEI/CEIm, salvo uso de datos no públicos o información sensible.'
+    ]
+  },
+  'Scoping review': {
+    design: 'Revisión exploratoria (scoping review) para mapear alcance, conceptos y vacíos de evidencia.',
+    variables: [
+      'Pregunta amplia y delimitada según objetivo de mapeo.',
+      'Criterios PCC: población, concepto y contexto.',
+      'Estrategia de búsqueda y fuentes de información.',
+      'Matriz de extracción y mapa de evidencia resultante.'
+    ],
+    analysis: [
+      'Síntesis descriptiva de hallazgos.',
+      'Categorización temática de conceptos, métodos y vacíos.'
+    ],
+    alerts: [
+      'Seguir recomendaciones PRISMA-ScR para reporte.',
+      'Evitar conclusiones de efectividad si la evidencia no lo permite.',
+      'Aclarar que la evaluación formal de calidad no siempre es obligatoria en este diseño.'
+    ]
+  },
+  Delphi: {
+    design: 'Estudio de consenso mediante metodología Delphi con rondas sucesivas y retroalimentación controlada.',
+    variables: [
+      'Composición y criterios de selección del panel de expertos.',
+      'Número de rondas y procedimiento de retroalimentación.',
+      'Criterios operativos de consenso predefinidos.',
+      'Mecanismos para preservar anonimato entre participantes.',
+      'Indicadores de concordancia y estabilidad entre rondas.'
+    ],
+    analysis: [
+      'Mediana y rango intercuartílico por ítem.',
+      'Porcentaje de acuerdo para cada propuesta.',
+      'Evaluación de estabilidad entre rondas si procede.'
+    ],
+    alerts: [
+      'Justificar selección y diversidad de expertos.',
+      'Definir previamente umbrales de consenso.',
+      'Evitar sesgo de selección en la conformación del panel.'
+    ]
+  }
+};
+
 function selectedRadio(name) {
   const input = form.querySelector(`input[name="${name}"]:checked`);
   return input ? input.value : '';
@@ -15,19 +171,118 @@ function selectedRadio(name) {
 
 function suggestStudyType(idea, projectType) {
   const source = `${idea} ${projectType}`.toLowerCase();
-  if (source.includes('efecto') || source.includes('impacto') || source.includes('intervención')) {
-    return 'Ensayo clínico';
-  }
-  if (source.includes('experiencia') || source.includes('percepción') || source.includes('opinión')) {
-    return 'Cualitativo';
-  }
-  if (source.includes('revisión') || source.includes('evidencia') || source.includes('síntesis')) {
-    return 'Revisión sistemática';
-  }
-  if (source.includes('factor') || source.includes('riesgo')) {
-    return 'Cohorte';
-  }
+  if (source.includes('efecto') || source.includes('impacto') || source.includes('intervención')) return 'Ensayo clínico';
+  if (source.includes('experiencia') || source.includes('percepción') || source.includes('opinión')) return 'Cualitativo';
+  if (source.includes('revisión') || source.includes('evidencia') || source.includes('síntesis')) return 'Revisión sistemática';
+  if (source.includes('factor') || source.includes('riesgo') || source.includes('seguimiento')) return 'Cohorte';
   return 'Observacional transversal';
+}
+
+function normalizeStudyType(studyType, idea, projectType, methodAlerts) {
+  if (!studyType || studyType === 'No lo sé') {
+    const suggested = suggestStudyType(idea, projectType);
+    methodAlerts.push(`No se definió un diseño explícito: se sugiere ${suggested} como punto de partida.`);
+    return suggested;
+  }
+
+  if (!STUDY_RULES[studyType]) {
+    methodAlerts.push('El tipo de estudio seleccionado no tiene reglas específicas; se aplica orientación general.');
+    return 'Observacional transversal';
+  }
+
+  return studyType;
+}
+
+function buildMethodologicalAssessment(values, studyType, methodAlerts) {
+  const required = {
+    idea: Boolean(values.idea),
+    population: Boolean(values.population),
+    mainVariable: Boolean(values.mainVariable)
+  };
+
+  const missingCount = Object.values(required).filter((item) => !item).length;
+  let color = '🟢 Verde';
+  let judgment = 'Proyecto suficientemente definido para una primera revisión académica.';
+
+  if (missingCount >= 2) {
+    color = '🔴 Rojo';
+    judgment = 'Proyecto insuficientemente definido; se recomienda completar elementos básicos antes de avanzar.';
+  } else if (missingCount === 1) {
+    color = '🟡 Amarillo';
+    judgment = 'Proyecto prometedor, pero aún presenta elementos incompletos que limitan su solidez metodológica.';
+  }
+
+  const coherenceNotes = [];
+
+  if (studyType === 'Revisión sistemática' || studyType === 'Scoping review') {
+    if (!values.idea) coherenceNotes.push('La pregunta de revisión todavía no está delimitada temáticamente.');
+    if (values.mainVariable && !values.mainVariable.toLowerCase().includes('pico') && !values.mainVariable.toLowerCase().includes('pcc')) {
+      coherenceNotes.push('En revisiones es recomendable reformular la variable principal como estructura PICO/PEO o PCC.');
+    }
+  }
+
+  if (studyType === 'Cualitativo' && values.mainVariable) {
+    coherenceNotes.push('En estudios cualitativos conviene expresar la variable principal como fenómeno o dimensión de interés.');
+  }
+
+  if (coherenceNotes.length) {
+    methodAlerts.push(...coherenceNotes);
+  }
+
+  const ethicsWarning = (values.personalData === 'Sí' || values.vulnerable === 'Sí')
+    ? 'Advertencia ética: se identifican datos sensibles y/o participantes vulnerables. Deben reforzarse medidas de confidencialidad, consentimiento y evaluación ética proporcional.'
+    : '';
+
+  return { color, judgment, required, ethicsWarning };
+}
+
+function buildImprovementRecommendations(values, studyType, assessment) {
+  const recommendations = [];
+
+  if (!assessment.required.idea) {
+    recommendations.push('Definir la idea inicial con mayor precisión (fenómeno, exposición o intervención concreta).');
+  }
+  if (!assessment.required.population) {
+    recommendations.push('Especificar población diana, ámbito asistencial/comunitario y criterios básicos de elegibilidad.');
+  }
+  if (!assessment.required.mainVariable) {
+    recommendations.push('Delimitar la variable o resultado principal con definición operativa y unidad de medida.');
+  }
+
+  if (studyType === 'Observacional transversal') {
+    recommendations.push('Precisar si el enfoque transversal será descriptivo o analítico y evitar lenguaje causal en objetivos y conclusiones.');
+  }
+  if (studyType === 'Cohorte') {
+    recommendations.push('Incluir un cronograma de seguimiento y estrategia para minimizar pérdidas y datos faltantes.');
+  }
+  if (studyType === 'Casos y controles') {
+    recommendations.push('Definir la fuente de casos y controles en el mismo marco poblacional para mejorar comparabilidad.');
+  }
+  if (studyType === 'Ensayo clínico') {
+    recommendations.push('Detallar asignación, cegamiento (si aplica), análisis por intención de tratar y plan de seguridad clínica.');
+  }
+  if (studyType === 'Cualitativo') {
+    recommendations.push('Describir técnicas de generación de datos (entrevistas, grupos focales, observación) y criterios de saturación.');
+  }
+  if (studyType === 'Revisión sistemática') {
+    recommendations.push('Estructurar la pregunta con PICO/PEO, registrar protocolo y preparar diagrama de flujo PRISMA.');
+  }
+  if (studyType === 'Scoping review') {
+    recommendations.push('Definir criterios PCC y anticipar formato del mapa de evidencia para la síntesis final.');
+  }
+  if (studyType === 'Delphi') {
+    recommendations.push('Establecer número estimado de rondas, umbral de consenso y plan de análisis de estabilidad entre rondas.');
+  }
+
+  if (values.personalData === 'No lo sé') {
+    recommendations.push('Confirmar si habrá tratamiento de datos personales para planificar medidas de protección desde el inicio.');
+  }
+
+  if (!recommendations.length) {
+    recommendations.push('Mantener coherencia entre pregunta, diseño, variables y plan de análisis antes del envío formal.');
+  }
+
+  return recommendations;
 }
 
 function buildDraft(values) {
@@ -35,102 +290,92 @@ function buildDraft(values) {
   const ethicsAlerts = [];
   const methodAlerts = [];
 
-  let studyType = values.studyType || 'No definido';
+  const studyType = normalizeStudyType(values.studyType, values.idea, values.projectType, methodAlerts);
+  const rules = STUDY_RULES[studyType] || STUDY_RULES['Observacional transversal'];
 
-  if (values.studyType === 'No lo sé' || !values.studyType) {
-    studyType = suggestStudyType(values.idea, values.projectType);
-    methodAlerts.push(`No se definió un diseño: se sugiere ${studyType} como punto de partida.`);
-  }
-
-  if (!values.mainVariable) {
-    warnings.push('No has definido variable/resultado principal: el objetivo aún no es evaluable.');
-  }
-
-  if (!values.population) {
-    warnings.push('No has definido población/muestra: la pregunta está poco delimitada.');
-  }
+  if (!values.mainVariable) warnings.push('No se ha definido la variable/resultado principal: el objetivo aún no es plenamente evaluable.');
+  if (!values.population) warnings.push('No se ha definido población/muestra: la pregunta está insuficientemente delimitada.');
+  if (!values.idea) warnings.push('No se ha definido idea inicial: se requiere concretar el problema de investigación.');
 
   if (values.personalData === 'Sí') {
-    ethicsAlerts.push('Hay uso de datos personales/clínicos: planifica anonimización o pseudonimización, consentimiento o justificación de dispensa.');
+    ethicsAlerts.push('Se prevé uso de datos personales/clínicos: planificar base jurídica, minimización de datos y medidas de anonimización o seudonimización.');
   } else if (values.personalData === 'No lo sé') {
-    ethicsAlerts.push('Debes confirmar si habrá tratamiento de datos personales para definir las garantías de protección de datos.');
+    ethicsAlerts.push('Confirmar si existirán datos personales para definir garantías de protección de datos y documentación ética asociada.');
   }
 
   if (values.vulnerable === 'Sí') {
-    ethicsAlerts.push('Participantes vulnerables detectados: aplica medidas reforzadas de protección, lenguaje adaptado y supervisión ética estricta.');
+    ethicsAlerts.push('Se incluyen participantes vulnerables: aplicar salvaguardas reforzadas de consentimiento, información y seguimiento ético.');
   } else if (values.vulnerable === 'No lo sé') {
-    ethicsAlerts.push('Aclara si existen participantes vulnerables para ajustar riesgos, consentimiento y revisión ética.');
+    ethicsAlerts.push('Aclarar si habrá población vulnerable para adaptar proporcionalmente la gestión de riesgos y consentimiento.');
   }
 
   const isReview = studyType === 'Revisión sistemática' || studyType === 'Scoping review';
 
   const title = values.idea
     ? `${values.idea.trim()} en ${values.population || 'población por definir'}`
-    : `Propuesta inicial de ${values.projectType || 'proyecto de investigación'}`;
+    : `Propuesta preliminar de ${values.projectType || 'proyecto de investigación'}`;
 
   const question = isReview
-    ? `¿Qué evidencia disponible existe sobre ${values.idea || 'el tema propuesto'} en ${values.area || 'el área seleccionada'}?`
-    : `¿Cómo se relaciona ${values.idea || 'la exposición/intervención de interés'} con ${values.mainVariable || 'el resultado principal'} en ${values.population || 'la población objetivo'}?`;
+    ? `¿Qué evidencia existe sobre ${values.idea || 'el fenómeno de interés'} en ${values.area || 'el área seleccionada'} y cómo se distribuye según los criterios definidos?`
+    : `¿Cuál es la relación entre ${values.idea || 'el fenómeno/exposición de interés'} y ${values.mainVariable || 'el resultado principal'} en ${values.population || 'la población objetivo'}?`;
+
+  const briefJustification = `La propuesta se orienta a ${values.area || 'un área de interés académico'} y pretende generar una base metodológica inicial, factible y revisable con supervisión docente, sin asumir resultados previos ni inferencias no sustentadas.`;
 
   const overallGoal = isReview
-    ? `Sintetizar la evidencia sobre ${values.idea || 'el tema de interés'} para apoyar decisiones académicas o clínicas.`
-    : `Evaluar ${values.idea || 'el fenómeno de interés'} en ${values.population || 'la población definida'} mediante un diseño ${studyType.toLowerCase()}.`;
+    ? `Sintetizar de forma estructurada la evidencia disponible sobre ${values.idea || 'el tema propuesto'} para identificar hallazgos consistentes y vacíos de conocimiento.`
+    : `Desarrollar un protocolo preliminar para estudiar ${values.idea || 'el fenómeno de interés'} en ${values.population || 'la población objetivo'}, con un diseño ${studyType.toLowerCase()} metodológicamente coherente.`;
 
   const specificGoals = isReview
     ? [
-        'Definir criterios de elegibilidad y pregunta estructurada (PICO/PCC).',
-        'Realizar búsqueda bibliográfica reproducible en bases de datos relevantes.',
-        'Sintetizar hallazgos, sesgos y vacíos de investigación.'
+        'Delimitar la pregunta de revisión y criterios de elegibilidad.',
+        'Aplicar una búsqueda reproducible en bases de datos pertinentes.',
+        'Sintetizar los hallazgos y describir limitaciones metodológicas de la evidencia incluida.'
       ]
     : [
-        `Describir las características de ${values.population || 'la muestra objetivo'}.`,
-        `Medir ${values.mainVariable || 'la variable principal'} con instrumentos válidos.`,
-        'Explorar factores asociados y posibles variables de confusión.'
+        `Describir características de ${values.population || 'la población de estudio'}.`,
+        `Definir y operacionalizar ${values.mainVariable || 'la variable principal'} para su medición.`,
+        'Explorar asociaciones relevantes considerando posibles factores de confusión.'
       ];
 
-  const variables = isReview
-    ? [
-        'Base de datos consultada y estrategia de búsqueda',
-        'Criterios de inclusión/exclusión',
-        'Tipo de estudio y características de las publicaciones',
-        'Resultados clave y riesgo de sesgo'
-      ]
-    : [
-        values.mainVariable || 'Variable resultado principal',
-        'Variable de exposición/intervención principal',
-        'Variables sociodemográficas mínimas (edad, sexo u otras pertinentes)',
-        'Variables de confusión potenciales'
-      ];
+  const populationSection = values.population
+    ? `Población diana propuesta: ${values.population}. Se recomienda definir marco de muestreo, criterios de inclusión/exclusión y tamaño muestral preliminar.`
+    : 'Población y muestra pendientes de definición. Debe concretarse población diana, ámbito de captación y estrategia de muestreo antes de presentar el protocolo.';
 
-  if (studyType === 'Ensayo clínico') {
-    methodAlerts.push('Si propones ensayo clínico, define aleatorización, comparador y plan de seguridad.');
-  }
-  if (studyType === 'Cualitativo') {
-    methodAlerts.push('En estudios cualitativos especifica muestreo teórico, saturación y método de análisis.');
-  }
-  if (isReview) {
-    methodAlerts.push('Para revisiones, registra protocolo (p. ej., PROSPERO si aplica) y sigue PRISMA/PRISMA-ScR.');
-    ethicsAlerts.push('Revisión bibliográfica: normalmente sin intervención directa en personas, pero mantén integridad científica y manejo transparente de sesgos.');
-  }
+  const variablesSection = rules.variables;
+  const analysisPlan = rules.analysis;
+  methodAlerts.push(...rules.alerts);
+
+  const assessment = buildMethodologicalAssessment(values, studyType, methodAlerts);
+  if (assessment.ethicsWarning) ethicsAlerts.push(assessment.ethicsWarning);
+
+  const recommendations = buildImprovementRecommendations(values, studyType, assessment);
 
   const checklist = [
-    'Pregunta de investigación clara y delimitada.',
-    'Objetivos alineados con el diseño propuesto.',
-    'Variables y plan de análisis preliminar definidos.',
-    'Valoración de riesgos y consideraciones éticas básicas.',
-    'Documentación preparada para tutor/CEI/CEIm según corresponda.'
+    'La pregunta de investigación está delimitada y es coherente con el diseño propuesto.',
+    'La población objetivo y criterios de elegibilidad están explícitos.',
+    'La variable principal se encuentra operacionalizada.',
+    'Existe un plan de análisis preliminar alineado con los objetivos.',
+    'Se han identificado sesgos previsibles y estrategias de control.',
+    'Se han considerado implicaciones éticas y de protección de datos.',
+    'El documento está listo para revisión por tutor o comité competente.'
   ];
 
   return {
     title,
     question,
+    briefJustification,
     overallGoal,
     specificGoals,
     studyType,
-    variables,
+    designDescription: rules.design,
+    populationSection,
+    variablesSection,
+    analysisPlan,
     warnings,
     methodAlerts,
     ethicsAlerts,
+    assessment,
+    recommendations,
     checklist
   };
 }
@@ -143,37 +388,50 @@ function formatDraft(data, values) {
     `Tipo de proyecto: ${values.projectType || 'No especificado'}`,
     `Área: ${values.area || 'No especificada'}`,
     '',
-    '1) Título provisional',
+    '1. Título provisional',
     data.title,
     '',
-    '2) Pregunta de investigación inicial',
+    '2. Pregunta de investigación',
     data.question,
     '',
-    '3) Objetivo general',
+    '3. Justificación breve',
+    data.briefJustification,
+    '',
+    '4. Objetivo general',
     data.overallGoal,
     '',
-    '4) Objetivos específicos',
+    '5. Objetivos específicos',
     ...data.specificGoals.map((goal, idx) => `${idx + 1}. ${goal}`),
     '',
-    '5) Diseño metodológico sugerido',
-    data.studyType,
+    '6. Diseño metodológico sugerido',
+    `Tipo de estudio: ${data.studyType}`,
+    `Descripción: ${data.designDescription}`,
+    ...(data.methodAlerts.length ? ['', 'Alertas metodológicas:', ...data.methodAlerts.map((alert, idx) => `${idx + 1}. ${alert}`)] : []),
     '',
-    '6) Variables mínimas recomendadas',
-    ...data.variables.map((item, idx) => `${idx + 1}. ${item}`),
+    '7. Población y muestra',
+    data.populationSection,
     '',
-    '7) Alertas metodológicas',
-    ...(data.methodAlerts.length ? data.methodAlerts : ['Sin alertas metodológicas críticas detectadas.']),
+    '8. Variables principales y secundarias',
+    ...data.variablesSection.map((item, idx) => `${idx + 1}. ${item}`),
     '',
-    '8) Alertas éticas básicas',
-    ...(data.ethicsAlerts.length ? data.ethicsAlerts : ['Sin alertas éticas adicionales más allá de la revisión estándar.']),
+    '9. Análisis estadístico o cualitativo preliminar',
+    ...data.analysisPlan.map((item, idx) => `${idx + 1}. ${item}`),
+    ...(data.warnings.length ? ['', 'Observaciones por campos incompletos:', ...data.warnings.map((warning, idx) => `${idx + 1}. ${warning}`)] : []),
     '',
-    '9) Advertencias por campos incompletos',
-    ...(data.warnings.length ? data.warnings : ['No se detectaron advertencias por campos vacíos.']),
+    '10. Consideraciones éticas iniciales',
+    ...(data.ethicsAlerts.length ? data.ethicsAlerts.map((alert, idx) => `${idx + 1}. ${alert}`) : ['No se detectan alertas adicionales más allá de la revisión ética ordinaria.']),
     '',
-    '10) Checklist previo al envío a tutor/comité ético',
+    '11. Valoración metodológica inicial',
+    `Semáforo: ${data.assessment.color}`,
+    data.assessment.judgment,
+    '',
+    '12. Recomendaciones para mejorar antes de enviar al tutor o comité',
+    ...data.recommendations.map((item, idx) => `${idx + 1}. ${item}`),
+    '',
+    '13. Checklist previo al envío',
     ...data.checklist.map((item, idx) => `[ ] ${idx + 1}. ${item}`),
     '',
-    'Nota: Este borrador orienta la planificación inicial y no sustituye la revisión académica o ética formal.'
+    'Nota: Este borrador es orientativo; no sustituye la evaluación metodológica, estadística ni ética formal.'
   ];
 
   return lines.join('\n');
