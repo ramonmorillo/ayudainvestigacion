@@ -46,6 +46,14 @@ Como el proyecto es estático (HTML/CSS/JS), se puede publicar directamente:
 - Sin backend.
 - Sin recopilación de datos personales.
 
+## Marco de uso responsable
+
+- Herramienta gratuita de apoyo metodológico para borradores iniciales.
+- Funcionamiento local-first: el contenido se procesa en el navegador del usuario.
+- No sustituye la supervisión de tutor, dirección académica ni evaluación por CEI/CEIm cuando aplique.
+- Evita introducir datos personales reales si no es estrictamente necesario para la práctica o simulación.
+- Revisa y valida siempre el resultado antes de usarlo en documentación oficial.
+
 ## Estado
 
 - **MVP v0.1** (funcional inicial).

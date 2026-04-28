@@ -194,8 +194,84 @@ textarea:focus {
 }
 
 .footer {
-  padding-bottom: 1.5rem;
+  padding: 1rem 0 1.6rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
   color: var(--muted);
+  font-size: 0.93rem;
+}
+
+.framework {
+  padding-bottom: 1.25rem;
+}
+
+.framework-header {
+  margin-bottom: 0.85rem;
+}
+
+.framework-header h2 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.35rem, 2.8vw, 1.75rem);
+}
+
+.framework-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.framework-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 1fr;
+}
+
+.framework-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 8px 26px rgba(29, 53, 87, 0.06);
+}
+
+.framework-card h3 {
+  margin: 0.1rem 0 0.4rem;
+  font-size: 1.03rem;
+}
+
+.framework-card p {
+  margin: 0;
+  color: var(--text);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.55rem;
+  padding: 0.24rem 0.58rem;
+  border-radius: 999px;
+  background: #edf2ff;
+  border: 1px solid #d7e1fb;
+  color: var(--primary-dark);
+  font-size: 0.79rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.badge-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #dfe8ff;
+  font-size: 0.72rem;
+}
+
+.footer small {
+  display: block;
 }
 
 @media (min-width: 920px) {
@@ -207,5 +283,15 @@ textarea:focus {
   .output-card {
     position: sticky;
     top: 1rem;
+  }
+
+  .framework-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 640px) and (max-width: 919px) {
+  .framework-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
