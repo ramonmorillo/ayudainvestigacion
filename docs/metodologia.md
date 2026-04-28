@@ -28,5 +28,19 @@
 - Ignorar sesgos y factores de confusión.
 - Olvidar criterios éticos y protección de datos.
 
+## Justificación del tamaño muestral: orientación inicial por diseño
+
+> Esta orientación es inicial y requiere validación con tutor, metodólogo y/o estadístico. No sustituye un cálculo formal cuando corresponda.
+
+- **Observacional transversal**: justificar variable principal, prevalencia/proporción o media esperada, precisión, confianza, población accesible y pérdidas.
+- **Cohorte**: justificar incidencia esperada, tamaño del efecto, proporción expuestos/no expuestos, seguimiento, pérdidas, potencia y alfa.
+- **Casos y controles**: justificar exposición en controles, odds ratio relevante, ratio casos:controles, potencia, alfa y disponibilidad real de casos.
+- **Ensayo clínico**: exige cálculo formal previo con variable principal, diferencia mínima clínicamente relevante, variabilidad/proporción esperada, potencia, alfa, pérdidas y asignación por grupos.
+- **Cualitativo**: no aplica potencia clásica; justificar saturación, diversidad de perfiles, profundidad y riqueza informativa.
+- **Revisión sistemática / Scoping review**: no aplica muestra de participantes; justificar alcance de búsqueda, fuentes, periodo, criterios y proceso de cribado/mapeo.
+- **Delphi**: justificar tamaño del panel por perfil experto, heterogeneidad, áreas representadas, número de rondas, estabilidad del consenso y pérdidas entre rondas.
+
+Si faltan **variable principal** o **población accesible**, la orientación sobre tamaño muestral será necesariamente incompleta.
+
 ## Recomendación
 Usa esta guía para preparar un primer borrador y revísalo siempre con tu tutor/metodólogo.
