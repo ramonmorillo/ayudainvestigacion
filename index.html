@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="AyudaInvestigacion: asistente gratuito para diseñar proyectos de investigación en local y sin APIs externas."
+    />
+    <title>AyudaInvestigacion · MVP v0.1</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero container">
+      <h1>AyudaInvestigacion</h1>
+      <p class="subtitle">Asistente gratuito para diseñar proyectos de investigación</p>
+      <p class="notice" role="note">
+        Herramienta de apoyo. No sustituye la supervisión de un tutor, comité ético o metodólogo.
+      </p>
+    </header>
+
+    <main class="container layout">
+      <section class="card form-card" aria-labelledby="wizard-title">
+        <h2 id="wizard-title">Flujo guiado</h2>
+        <p class="muted">Completa los pasos. Puedes dejar campos vacíos y generar un borrador inicial.</p>
+
+        <div class="progress-wrap" aria-live="polite">
+          <div class="progress-meta">
+            <span id="progressText">Paso 1 de 8</span>
+            <span id="progressPercent">12%</span>
+          </div>
+          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="12">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+        </div>
+
+        <form id="projectForm" novalidate>
+          <ol class="steps">
+            <li class="field">
+              <label for="projectType">1. Tipo de proyecto</label>
+              <select id="projectType" name="projectType">
+                <option value="">Selecciona una opción</option>
+                <option>TFG</option>
+                <option>TFM</option>
+                <option>Tesis doctoral</option>
+                <option>Protocolo CEI/CEIm</option>
+                <option>Artículo científico</option>
+                <option>Otro</option>
+              </select>
+            </li>
+
+            <li class="field">
+              <label for="area">2. Área</label>
+              <select id="area" name="area">
+                <option value="">Selecciona una opción</option>
+                <option>Ciencias de la salud</option>
+                <option>Farmacia</option>
+                <option>Enfermería</option>
+                <option>Medicina</option>
+                <option>Ciencias sociales</option>
+                <option>Educación</option>
+                <option>Otra</option>
+              </select>
+            </li>
+
+            <li class="field">
+              <label for="idea">3. Idea inicial del proyecto</label>
+              <textarea id="idea" name="idea" rows="3" placeholder="Ej.: Impacto de un programa educativo en adherencia terapéutica..."></textarea>
+            </li>
+
+            <li class="field">
+              <label for="population">4. Población o muestra</label>
+              <input id="population" name="population" type="text" placeholder="Ej.: Adultos con diabetes tipo 2 en atención primaria" />
+            </li>
+
+            <li class="field">
+              <label for="mainVariable">5. Variable o resultado principal</label>
+              <input id="mainVariable" name="mainVariable" type="text" placeholder="Ej.: HbA1c, adherencia, satisfacción, etc." />
+            </li>
+
+            <li class="field">
+              <label for="studyType">6. Tipo de estudio deseado</label>
+              <select id="studyType" name="studyType">
+                <option value="">Selecciona una opción</option>
+                <option>Observacional transversal</option>
+                <option>Cohorte</option>
+                <option>Casos y controles</option>
+                <option>Ensayo clínico</option>
+                <option>Cualitativo</option>
+                <option>Revisión sistemática</option>
+                <option>Scoping review</option>
+                <option>Delphi</option>
+                <option>No lo sé</option>
+              </select>
+            </li>
+
+            <li class="field field-inline">
+              <label>7. Uso de datos personales o clínicos</label>
+              <div class="radio-group">
+                <label><input type="radio" name="personalData" value="Sí" /> Sí</label>
+                <label><input type="radio" name="personalData" value="No" /> No</label>
+                <label><input type="radio" name="personalData" value="No lo sé" /> No lo sé</label>
+              </div>
+            </li>
+
+            <li class="field field-inline">
+              <label>8. Participantes vulnerables</label>
+              <div class="radio-group">
+                <label><input type="radio" name="vulnerable" value="Sí" /> Sí</label>
+                <label><input type="radio" name="vulnerable" value="No" /> No</label>
+                <label><input type="radio" name="vulnerable" value="No lo sé" /> No lo sé</label>
+              </div>
+            </li>
+          </ol>
+
+          <div class="actions">
+            <button type="submit" class="btn primary">Generar borrador</button>
+            <button type="button" class="btn" id="resetButton">Reiniciar formulario</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card output-card" aria-labelledby="output-title">
+        <h2 id="output-title">Borrador generado</h2>
+        <p class="muted">Aquí aparecerá tu estructura inicial para revisar con tu tutor o comité.</p>
+        <pre id="output" class="output" aria-live="polite">Completa el formulario y pulsa “Generar borrador”.</pre>
+
+        <div class="actions">
+          <button type="button" class="btn" id="copyButton">Copiar resultado</button>
+          <button type="button" class="btn" id="downloadButton">Descargar .txt</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="container footer">
+      <small>MVP v0.1 · Local-first · Sin APIs externas · Compatible con GitHub Pages</small>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
