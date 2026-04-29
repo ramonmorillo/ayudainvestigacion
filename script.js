@@ -17,7 +17,7 @@ const maturityCompletion = document.getElementById('maturityCompletion');
 const maturityCompleted = document.getElementById('maturityCompleted');
 const maturityPending = document.getElementById('maturityPending');
 const maturityRecommendation = document.getElementById('maturityRecommendation');
-const totalSteps = 27;
+const totalSteps = 29;
 let latestDraftText = '';
 let latestValues = null;
 let latestDraftData = null;
@@ -54,7 +54,7 @@ const sanitizeText = (text, fallback = PENDING) => {
   return cleaned;
 };
 
-function collectValues() { return { templateSelector:value('templateSelector'), researchProfile:value('researchProfile'), disciplineArea:value('disciplineArea'), projectType:value('projectType'), area:value('area'), title:value('title'), question:value('question'), hypothesis:value('hypothesis'), picoPopulation:value('picoPopulation'), picoIntervention:value('picoIntervention'), picoComparator:value('picoComparator'), picoOutcome:value('picoOutcome'), justification:value('justification'), mainObjective:value('mainObjective'), secondaryObjectives:value('secondaryObjectives'), studyType:value('studyType'), population:value('population'), inclusionCriteria:value('inclusionCriteria'), exclusionCriteria:value('exclusionCriteria'), mainVariable:value('mainVariable'), secondaryVariables:value('secondaryVariables'), dataSource:value('dataSource'), personalData:value('personalData'), vulnerable:value('vulnerable'), biologicalSamples:value('biologicalSamples'), interventionPatients:value('interventionPatients'), medProducts:value('medProducts'), informedConsent:value('informedConsent'), sampleSize:value('sampleSize'), timeline:value('timeline'), center:value('center'), principalInvestigator:value('principalInvestigator')}; }
+function collectValues() { return { templateSelector:value('templateSelector'), specialtySelector:value('specialtySelector'), specialMeasureSelector:value('specialMeasureSelector'), researchProfile:value('researchProfile'), disciplineArea:value('disciplineArea'), projectType:value('projectType'), area:value('area'), title:value('title'), question:value('question'), hypothesis:value('hypothesis'), picoPopulation:value('picoPopulation'), picoIntervention:value('picoIntervention'), picoComparator:value('picoComparator'), picoOutcome:value('picoOutcome'), justification:value('justification'), mainObjective:value('mainObjective'), secondaryObjectives:value('secondaryObjectives'), studyType:value('studyType'), population:value('population'), inclusionCriteria:value('inclusionCriteria'), exclusionCriteria:value('exclusionCriteria'), mainVariable:value('mainVariable'), secondaryVariables:value('secondaryVariables'), dataSource:value('dataSource'), personalData:value('personalData'), vulnerable:value('vulnerable'), biologicalSamples:value('biologicalSamples'), interventionPatients:value('interventionPatients'), medProducts:value('medProducts'), informedConsent:value('informedConsent'), sampleSize:value('sampleSize'), timeline:value('timeline'), center:value('center'), principalInvestigator:value('principalInvestigator')}; }
 
 function profileGuidance(v) {
   const profile = (v.researchProfile || '').toLowerCase();
@@ -355,8 +355,78 @@ document.querySelectorAll('.tab-btn').forEach((btn)=>btn.addEventListener('click
 updateProgress();
 
 
-const templates={TFG:{researchProfile:'TFG',projectType:'TFG'},'cohorte':{studyType:'Cohorte'},'casos-control':{studyType:'Casos y controles'},'ensayo':{studyType:'Ensayo clínico'},'revision':{studyType:'Revisión sistemática'},'farmacia-hospitalaria':{disciplineArea:'Salud',area:'Farmacia Hospitalaria'},'oncologia':{disciplineArea:'Salud',area:'Oncología'},'prom':{disciplineArea:'Salud',mainVariable:'PROM validado'}};
-document.getElementById('templateSelector')?.addEventListener('change',(e)=>{const t=templates[e.target.value]||{};Object.entries(t).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});updateProgress();});
+const quickTemplates = [
+  { value: '', label: 'Seleccionar plantilla...' },
+  { value: 'tfg-tfm', label: 'TFG / TFM básico' },
+  { value: 'cohorte-retrospectiva', label: 'Cohorte retrospectiva' },
+  { value: 'cohorte-prospectiva', label: 'Cohorte prospectiva' },
+  { value: 'casos-controles', label: 'Casos y controles' },
+  { value: 'transversal', label: 'Estudio transversal' },
+  { value: 'ensayo-intervencion', label: 'Ensayo clínico / intervención' },
+  { value: 'revision-sistematica', label: 'Revisión sistemática' },
+  { value: 'revision-narrativa', label: 'Revisión narrativa' },
+  { value: 'validacion-cuestionario', label: 'Validación de cuestionario' },
+  { value: 'cualitativo', label: 'Estudio cualitativo' },
+  { value: 'serie-casos', label: 'Serie de casos' },
+  { value: 'mejora-calidad', label: 'Proyecto de mejora de calidad' },
+  { value: 'tesis-doctoral', label: 'Tesis doctoral (general)' }
+];
+const specialties = ['', 'General', 'Medicina', 'Enfermería', 'Farmacia', 'Oncología', 'Cardiología', 'Reumatología', 'Pediatría', 'Salud pública', 'Atención primaria', 'Psicología', 'Fisioterapia', 'Multidisciplinar', 'Otra'];
+const specialMeasures = ['', 'PROM', 'PREM', 'Biomarcadores', 'Supervivencia', 'Costes', 'Calidad de vida', 'Eventos adversos', 'No aplica'];
+
+function fillSelectOptions(selectId, options, includePlaceholder = false){
+  const select = document.getElementById(selectId);
+  if(!select) return;
+  const normalized = includePlaceholder ? options : options.map((opt)=>({ value: opt, label: opt || 'Seleccionar...' }));
+  select.innerHTML = normalized.map((opt)=>`<option value="${opt.value}">${opt.label}</option>`).join('');
+}
+
+fillSelectOptions('templateSelector', quickTemplates, true);
+fillSelectOptions('specialtySelector', specialties);
+fillSelectOptions('specialMeasureSelector', specialMeasures);
+
+const templateMappings={
+  'tfg-tfm':{researchProfile:'TFG',projectType:'TFG',studyType:'Estudio observacional'},
+  'cohorte-retrospectiva':{studyType:'Cohorte retrospectiva'},
+  'cohorte-prospectiva':{studyType:'Cohorte prospectiva'},
+  'casos-controles':{studyType:'Casos y controles'},
+  'transversal':{studyType:'Estudio transversal'},
+  'ensayo-intervencion':{studyType:'Ensayo clínico'},
+  'revision-sistematica':{studyType:'Revisión sistemática'},
+  'revision-narrativa':{studyType:'Revisión narrativa'},
+  'validacion-cuestionario':{studyType:'Validación de cuestionario',mainVariable:'Puntuación de cuestionario validado'},
+  'cualitativo':{studyType:'Estudio cualitativo'},
+  'serie-casos':{studyType:'Serie de casos'},
+  'mejora-calidad':{studyType:'Proyecto de mejora de calidad'},
+  'tesis-doctoral':{researchProfile:'Doctorado',projectType:'Tesis'}
+};
+const legacyTemplateMap={
+  'TFG':'tfg-tfm',
+  'cohorte':'cohorte-retrospectiva',
+  'casos-control':'casos-controles',
+  'ensayo':'ensayo-intervencion',
+  'revision':'revision-sistematica',
+  'farmacia-hospitalaria':'cohorte-retrospectiva',
+  'oncologia':'cohorte-retrospectiva',
+  'prom':'validacion-cuestionario'
+};
+
+function applyTemplateSmartHelp(v){
+  if(v.templateSelector==='cohorte-retrospectiva' && v.specialtySelector==='Oncología' && v.specialMeasureSelector==='Supervivencia'){
+    const hints=['tiempo-evento','Kaplan-Meier','Cox','criterios de inclusión claros','seguimiento'];
+    const sv=document.getElementById('secondaryVariables');
+    if(sv && !sv.value.trim()) sv.value = hints.join('; ');
+  }
+  if(v.templateSelector==='validacion-cuestionario' && (v.specialtySelector==='' || v.specialtySelector==='General') && v.specialMeasureSelector==='PROM'){
+    const hints=['alfa de Cronbach','test-retest','validez de constructo','muestra recomendada'];
+    const sv=document.getElementById('secondaryVariables');
+    if(sv && !sv.value.trim()) sv.value = hints.join('; ');
+  }
+}
+
+document.getElementById('templateSelector')?.addEventListener('change',(e)=>{const normalized=legacyTemplateMap[e.target.value]||e.target.value; if(normalized!==e.target.value)e.target.value=normalized; const t=templateMappings[normalized]||{};Object.entries(t).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;}); applyTemplateSmartHelp(collectValues()); updateProgress();});
+document.getElementById('specialtySelector')?.addEventListener('change',()=>{const v=collectValues(); if(v.specialtySelector==='Otra'){const areaField=document.getElementById('area'); if(areaField && !areaField.value.trim()) areaField.placeholder='Especifique su especialidad';} if(v.specialtySelector && v.specialtySelector!=='Otra' && !document.getElementById('area')?.value.trim()) document.getElementById('area').value=v.specialtySelector; applyTemplateSmartHelp(v); updateProgress();});
+document.getElementById('specialMeasureSelector')?.addEventListener('change',()=>{const v=collectValues(); if(v.specialMeasureSelector==='PROM' && !document.getElementById('mainVariable')?.value.trim()) document.getElementById('mainVariable').value='PROM validado'; applyTemplateSmartHelp(v); updateProgress();});
 
 const zAlpha={0.05:1.96,0.01:2.58};const zPower={0.8:0.84,0.9:1.28};
 document.getElementById('sampleCalcButton')?.addEventListener('click',()=>{const type=value('calcType');const a=parseFloat(value('calcAlpha'))||0.05;const p=parseFloat(value('calcPower'))||0.8;const d=parseFloat(value('calcEffect'))||0.5;const drop=(parseFloat(value('calcDropout'))||0)/100;const za=zAlpha[a]||1.96;const zb=zPower[p]||0.84;let n=0;if(type==='medias'){n=2*((za+zb)**2)/(d**2);}else if(type==='proporciones'){n=2*((za+zb)**2)*0.25/(d**2);}else{n=((za**2)*0.25)/(d**2);}const adjusted=Math.ceil(n/(1-drop));document.getElementById('sampleCalcResult').textContent=`n aproximado: ${Math.ceil(n)} (ajustado por pérdidas: ${adjusted})`;const ss=document.getElementById('sampleSize');if(ss && !ss.value) ss.value=`${adjusted} participantes (estimación rápida)`;updateProgress();});
