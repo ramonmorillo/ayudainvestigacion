@@ -7,192 +7,89 @@
       name="description"
       content="AyudaInvestigacion: asistente gratuito para diseñar proyectos de investigación en local y sin APIs externas."
     />
-    <title>AyudaInvestigacion · MVP v0.1</title>
+    <title>AyudaInvestigacion · Protocolo + CEI/SICEIA</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="hero container">
       <h1>AyudaInvestigacion</h1>
-      <p class="subtitle">Asistente gratuito para diseñar proyectos de investigación</p>
-      <p class="notice" role="note">
-        Herramienta de apoyo. No sustituye la supervisión de un tutor, comité ético o metodólogo.
-      </p>
+      <p class="subtitle">Asistente gratuito para diseñar protocolos de investigación</p>
+      <p class="notice" role="note">Herramienta orientativa. No sustituye revisión metodológica, ética, legal ni evaluación CEI.</p>
     </header>
 
-    <main class="container layout">
-      <section class="card form-card" aria-labelledby="wizard-title">
-        <h2 id="wizard-title">Flujo guiado</h2>
-        <p class="muted">Completa los pasos. Puedes dejar campos vacíos y generar un borrador inicial.</p>
+    <main class="container">
+      <nav class="tabs" aria-label="Secciones principales">
+        <button class="tab-btn active" data-tab="generator">Generador de protocolo</button>
+        <button class="tab-btn" data-tab="cei">Ayuda CEI / SICEIA</button>
+        <button class="tab-btn" data-tab="checklist">Checklist</button>
+        <button class="tab-btn" data-tab="about">Acerca de</button>
+      </nav>
 
-        <div class="progress-wrap" aria-live="polite">
-          <div class="progress-meta">
-            <span id="progressText">Paso 1 de 8</span>
-            <span id="progressPercent">12%</span>
-          </div>
-          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="12">
-            <div id="progressBar" class="progress-bar"></div>
-          </div>
+      <section id="tab-generator" class="tab-panel active">
+        <div class="layout">
+          <section class="card form-card" aria-labelledby="wizard-title">
+            <h2 id="wizard-title">Formulario guiado</h2>
+            <div class="progress-wrap" aria-live="polite">
+              <div class="progress-meta"><span id="progressText">Paso 1 de 25</span><span id="progressPercent">4%</span></div>
+              <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4"><div id="progressBar" class="progress-bar"></div></div>
+            </div>
+            <form id="projectForm" novalidate>
+              <div id="validationAlerts" class="soft-alerts" aria-live="polite"></div>
+              <ol class="steps">
+                <li class="field"><label for="projectType">Tipo de proyecto</label><select id="projectType"><option value=""></option><option>TFG</option><option>TFM</option><option>Tesis</option><option>Comunicación</option><option>Estudio observacional</option><option>Ensayo</option><option>Revisión</option><option>Proyecto CEI</option><option>Otro</option></select></li>
+                <li class="field"><label for="area">Área</label><input id="area" type="text" /></li>
+                <li class="field"><label for="title">Título provisional</label><input id="title" type="text" /></li>
+                <li class="field"><label for="question">Pregunta de investigación</label><textarea id="question" rows="2"></textarea></li>
+                <li class="field"><label for="picoPopulation">PICO/PECO: Población</label><input id="picoPopulation" type="text" /></li>
+                <li class="field"><label for="picoIntervention">PICO/PECO: Intervención/exposición</label><input id="picoIntervention" type="text" /></li>
+                <li class="field"><label for="picoComparator">PICO/PECO: Comparador</label><input id="picoComparator" type="text" /></li>
+                <li class="field"><label for="picoOutcome">PICO/PECO: Outcome/resultado</label><input id="picoOutcome" type="text" /></li>
+                <li class="field"><label for="justification">Justificación breve</label><textarea id="justification" rows="2"></textarea></li>
+                <li class="field"><label for="mainObjective">Objetivo principal</label><textarea id="mainObjective" rows="2"></textarea></li>
+                <li class="field"><label for="secondaryObjectives">Objetivos secundarios</label><textarea id="secondaryObjectives" rows="2"></textarea></li>
+                <li class="field"><label for="studyType">Diseño deseado</label><input id="studyType" type="text" placeholder="Ej. Cohorte, casos y controles, ensayo..."/></li>
+                <li class="field"><label for="population">Población/muestra</label><input id="population" type="text" /></li>
+                <li class="field"><label for="inclusionCriteria">Criterios de inclusión</label><textarea id="inclusionCriteria" rows="2"></textarea></li>
+                <li class="field"><label for="exclusionCriteria">Criterios de exclusión</label><textarea id="exclusionCriteria" rows="2"></textarea></li>
+                <li class="field"><label for="mainVariable">Variable principal</label><input id="mainVariable" type="text" /></li>
+                <li class="field"><label for="secondaryVariables">Variables secundarias</label><textarea id="secondaryVariables" rows="2"></textarea></li>
+                <li class="field"><label for="dataSource">Fuente de datos</label><input id="dataSource" type="text" /></li>
+                <li class="field"><label for="sampleSize">Tamaño muestral (si lo sabe)</label><input id="sampleSize" type="text" /></li>
+                <li class="field"><label for="timeline">Duración/calendario previsto</label><input id="timeline" type="text" /></li>
+                <li class="field"><label for="center">Centro donde se realizará</label><input id="center" type="text" /></li>
+                <li class="field"><label for="principalInvestigator">Investigador principal/tutor (opcional)</label><input id="principalInvestigator" type="text" /></li>
+              </ol>
+              <div class="grid-ethics">
+                <div class="field"><label for="personalData">Uso de datos personales o clínicos</label><select id="personalData"><option>No lo sé</option><option>Sí</option><option>No</option></select></div>
+                <div class="field"><label for="vulnerable">Participantes vulnerables</label><select id="vulnerable"><option>No lo sé</option><option>Sí</option><option>No</option></select></div>
+                <div class="field"><label for="biologicalSamples">Uso de muestras biológicas</label><select id="biologicalSamples"><option>No lo sé</option><option>Sí</option><option>No</option></select></div>
+                <div class="field"><label for="interventionPatients">Intervención sobre pacientes</label><select id="interventionPatients"><option>No lo sé</option><option>Sí</option><option>No</option></select></div>
+                <div class="field"><label for="medProducts">Uso de medicamentos/productos sanitarios</label><select id="medProducts"><option>No lo sé</option><option>Sí</option><option>No</option></select></div>
+                <div class="field"><label for="informedConsent">Necesidad probable de consentimiento informado</label><select id="informedConsent"><option>No lo sé</option><option>Sí</option><option>No</option></select></div>
+              </div>
+              <div class="actions"><button type="submit" class="btn primary">Generar borrador</button><button type="button" class="btn" id="resetButton">Reiniciar formulario</button></div>
+            </form>
+          </section>
+
+          <section class="card output-card">
+            <h2>Borrador generado</h2>
+            <div id="output" class="output-panel"><p class="status-message">Completa el formulario y pulsa “Generar borrador”.</p><pre id="previewText" class="preview-text">Aún no hay contenido generado.</pre></div>
+            <div class="actions"><button type="button" class="btn" id="copyButton">Copiar resumen</button><button type="button" class="btn" id="downloadPdfButton" disabled>Descargar PDF</button></div>
+          </section>
         </div>
-
-        <form id="projectForm" novalidate>
-          <ol class="steps">
-            <li class="field">
-              <label for="projectType">1. Tipo de proyecto</label>
-              <select id="projectType" name="projectType">
-                <option value="">Selecciona una opción</option>
-                <option>TFG</option>
-                <option>TFM</option>
-                <option>Tesis doctoral</option>
-                <option>Protocolo CEI/CEIm</option>
-                <option>Artículo científico</option>
-                <option>Otro</option>
-              </select>
-            </li>
-
-            <li class="field">
-              <label for="area">2. Área</label>
-              <select id="area" name="area">
-                <option value="">Selecciona una opción</option>
-                <option>Ciencias de la salud</option>
-                <option>Farmacia</option>
-                <option>Enfermería</option>
-                <option>Medicina</option>
-                <option>Ciencias sociales</option>
-                <option>Educación</option>
-                <option>Otra</option>
-              </select>
-            </li>
-
-            <li class="field">
-              <label for="idea">3. Idea inicial del proyecto</label>
-              <textarea id="idea" name="idea" rows="3" placeholder="Ej.: Impacto de un programa educativo en adherencia terapéutica..."></textarea>
-            </li>
-
-            <li class="field">
-              <label for="population">4. Población o muestra</label>
-              <input id="population" name="population" type="text" placeholder="Ej.: Adultos con diabetes tipo 2 en atención primaria" />
-            </li>
-
-            <li class="field">
-              <label for="mainVariable">5. Variable o resultado principal</label>
-              <input id="mainVariable" name="mainVariable" type="text" placeholder="Ej.: HbA1c, adherencia, satisfacción, etc." />
-            </li>
-
-            <li class="field">
-              <label for="studyType">6. Tipo de estudio deseado</label>
-              <select id="studyType" name="studyType">
-                <option value="">Selecciona una opción</option>
-                <option>Observacional transversal</option>
-                <option>Cohorte</option>
-                <option>Casos y controles</option>
-                <option>Ensayo clínico</option>
-                <option>Cualitativo</option>
-                <option>Revisión sistemática</option>
-                <option>Scoping review</option>
-                <option>Delphi</option>
-                <option>No lo sé</option>
-              </select>
-            </li>
-
-            <li class="field field-inline">
-              <label>7. Uso de datos personales o clínicos</label>
-              <div class="radio-group">
-                <label><input type="radio" name="personalData" value="Sí" /> Sí</label>
-                <label><input type="radio" name="personalData" value="No" /> No</label>
-                <label><input type="radio" name="personalData" value="No lo sé" /> No lo sé</label>
-              </div>
-            </li>
-
-            <li class="field field-inline">
-              <label>8. Participantes vulnerables</label>
-              <div class="radio-group">
-                <label><input type="radio" name="vulnerable" value="Sí" /> Sí</label>
-                <label><input type="radio" name="vulnerable" value="No" /> No</label>
-                <label><input type="radio" name="vulnerable" value="No lo sé" /> No lo sé</label>
-              </div>
-            </li>
-          </ol>
-
-          <div class="actions">
-            <button type="submit" class="btn primary">Generar borrador</button>
-            <button type="button" class="btn" id="resetButton">Reiniciar formulario</button>
-          </div>
-        </form>
       </section>
 
-      <section class="card output-card" aria-labelledby="output-title">
-        <h2 id="output-title">Borrador generado</h2>
-        <p class="muted">Genera un borrador profesional en PDF para revisar con tu tutor o comité.</p>
-        <div id="output" class="output-panel" aria-live="polite">
-          <p class="status-message">Completa el formulario y pulsa “Generar borrador”.</p>
-          <p class="preview-title">Vista previa breve</p>
-          <p id="previewText" class="preview-text">Aún no hay contenido generado.</p>
-        </div>
-
-        <div class="actions">
-          <button type="button" class="btn" id="copyButton">Copiar resumen</button>
-          <button type="button" class="btn" id="downloadPdfButton" disabled>Descargar PDF</button>
-        </div>
+      <section id="tab-cei" class="tab-panel card">
+        <h2>Ayuda CEI / SICEIA</h2>
+        <p>Los Comités de Ética de la Investigación evalúan aspectos metodológicos, éticos y jurídicos de investigaciones con seres humanos, datos de salud o muestras biológicas.</p>
+        <p class="notice">En Andalucía, la tramitación de proyectos debe realizarse a través de SICEIA cuando corresponda, utilizando certificado electrónico y AutoFirma digital.</p>
+        <p><a href="https://www.bioetica-andalucia.es/3-comites-de-etica/3-3-comites-etica-investigacion-ceis/" target="_blank" rel="noopener">Bioética Andalucía - CEIs</a></p>
+        <p><a href="https://fpysz239.csalud.junta-andalucia.es/salud/siceia/" target="_blank" rel="noopener">SICEIA</a></p>
       </section>
+
+      <section id="tab-checklist" class="tab-panel card"><h2>Checklist inteligente</h2><ul id="dynamicChecklist"><li>Genera un borrador para ver la checklist personalizada.</li></ul></section>
+      <section id="tab-about" class="tab-panel card"><h2>Acerca de</h2><p>App estática sin backend ni APIs de pago, preparada para GitHub Pages.</p></section>
     </main>
-
-    <section class="container framework" aria-labelledby="framework-title">
-      <div class="framework-header">
-        <h2 id="framework-title">Marco científico, ético y de autoría</h2>
-        <p>
-          AyudaInvestigacion se ha diseñado como una herramienta gratuita, local y orientada a mejorar la calidad inicial de los proyectos de investigación.
-        </p>
-      </div>
-
-      <div class="framework-grid">
-        <article class="framework-card">
-          <p class="badge"><span class="badge-icon" aria-hidden="true">Ⓜ</span>Metodología</p>
-          <h3>Sobre la herramienta</h3>
-          <p>
-            AyudaInvestigacion es un asistente gratuito para ayudar a estudiantes, residentes, doctorandos e investigadores noveles a estructurar proyectos de investigación de forma ordenada, clara y metodológicamente coherente.
-          </p>
-        </article>
-
-        <article class="framework-card">
-          <p class="badge"><span class="badge-icon" aria-hidden="true">🔬</span>Investigación</p>
-          <h3>Base metodológica</h3>
-          <p>
-            La herramienta se inspira en marcos internacionales de diseño y comunicación científica, incluyendo EQUATOR Network, STROBE, CONSORT, PRISMA, SPIRIT, COREQ y guías metodológicas para estudios observacionales, experimentales, cualitativos y revisiones.
-          </p>
-        </article>
-
-        <article class="framework-card">
-          <p class="badge"><span class="badge-icon" aria-hidden="true">⚖</span>Ética</p>
-          <h3>Ética e integridad científica</h3>
-          <p>
-            El sistema incorpora alertas básicas sobre consentimiento informado, uso de datos personales o clínicos, anonimización, participantes vulnerables, valoración por CEI/CEIm y necesidad de revisión por tutores o comités competentes.
-          </p>
-        </article>
-
-        <article class="framework-card">
-          <p class="badge"><span class="badge-icon" aria-hidden="true">🔒</span>Privacidad</p>
-          <h3>Privacidad y uso local</h3>
-          <p>
-            La versión actual funciona sin backend, sin APIs externas y sin almacenamiento remoto. La información introducida por el usuario se procesa localmente en el navegador y no se envía a servidores externos.
-          </p>
-        </article>
-
-        <article class="framework-card">
-          <p class="badge"><span class="badge-icon" aria-hidden="true">🎓</span>Docencia</p>
-          <h3>Autoría y responsabilidad</h3>
-          <p>
-            Herramienta creada por Ramón Morillo-Verdugo como recurso de apoyo docente, metodológico e investigador. Su uso no sustituye la supervisión académica, metodológica, estadística, ética o legal que cada proyecto pueda requerir.
-          </p>
-        </article>
-      </div>
-    </section>
-
-    <footer class="container footer">
-      <small>
-        AyudaInvestigacion · Herramienta gratuita de apoyo al diseño de proyectos de investigación · Creada por Ramón
-        Morillo-Verdugo
-      </small>
-    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="assets/pdf-generator.js"></script>
