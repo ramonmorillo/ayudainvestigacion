@@ -29,7 +29,6 @@
     doc.setFontSize(16);
     doc.text('AyudaInvestigacion', pageWidth / 2, 52, { align: 'center' });
     y = 72;
-    p(CREDIT, 10);
     kv('Fecha de generación', new Date().toISOString().slice(0, 10));
     kv('Versión del borrador', '1.0');
     kv('Título provisional del proyecto', values.title);
@@ -70,6 +69,15 @@
     let idx = 1;
     Object.entries(draftData.sections).forEach(([k, v]) => { heading(`${idx}. ${k}`, 11); p(v, 10); idx += 1; });
     if (draftData.pendingInfo.length) { heading('Información crítica pendiente', 11); draftData.pendingInfo.forEach((x) => p(`- ${x}`, 10)); }
+
+    doc.addPage(); y = 20;
+    heading('Recomendaciones inteligentes generadas por la herramienta', 14);
+    const recs = (draftData.checklist || []).slice(0, 10);
+    recs.forEach((r, i) => p(`${i + 1}. ${r}`, 10));
+    if (draftData.pendingInfo?.length) {
+      heading('Campos críticos a completar', 11);
+      draftData.pendingInfo.forEach((x) => p(`- ${x}`, 10));
+    }
 
     const pages = doc.getNumberOfPages();
     for (let i = 1; i <= pages; i += 1) {

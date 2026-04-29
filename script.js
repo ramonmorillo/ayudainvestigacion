@@ -29,7 +29,7 @@ const NOTE = 'Este documento es un borrador orientativo generado como ayuda para
 const AUTHOR_CREDIT = 'Herramienta creada por Ramón Morillo. Abril de 2026.';
 
 const ACTION_VERBS = ['evaluar', 'analizar', 'describir', 'determinar', 'comparar', 'estimar', 'identificar', 'validar', 'desarrollar', 'explorar', 'medir', 'estudiar'];
-const value = (id) => document.getElementById(id).value.trim();
+const value = (id) => (document.getElementById(id)?.value || '').trim();
 const criticalFields = [
   { key: 'title', label: 'Título' },
   { key: 'question', label: 'Pregunta de investigación' },
@@ -51,7 +51,7 @@ const sanitizeText = (text, fallback = PENDING) => {
   return cleaned;
 };
 
-function collectValues() { return { projectType:value('projectType'), area:value('area'), title:value('title'), question:value('question'), picoPopulation:value('picoPopulation'), picoIntervention:value('picoIntervention'), picoComparator:value('picoComparator'), picoOutcome:value('picoOutcome'), justification:value('justification'), mainObjective:value('mainObjective'), secondaryObjectives:value('secondaryObjectives'), studyType:value('studyType'), population:value('population'), inclusionCriteria:value('inclusionCriteria'), exclusionCriteria:value('exclusionCriteria'), mainVariable:value('mainVariable'), secondaryVariables:value('secondaryVariables'), dataSource:value('dataSource'), personalData:value('personalData'), vulnerable:value('vulnerable'), biologicalSamples:value('biologicalSamples'), interventionPatients:value('interventionPatients'), medProducts:value('medProducts'), informedConsent:value('informedConsent'), sampleSize:value('sampleSize'), timeline:value('timeline'), center:value('center'), principalInvestigator:value('principalInvestigator')}; }
+function collectValues() { return { templateSelector:value('templateSelector'), projectType:value('projectType'), area:value('area'), title:value('title'), question:value('question'), hypothesis:value('hypothesis'), picoPopulation:value('picoPopulation'), picoIntervention:value('picoIntervention'), picoComparator:value('picoComparator'), picoOutcome:value('picoOutcome'), justification:value('justification'), mainObjective:value('mainObjective'), secondaryObjectives:value('secondaryObjectives'), studyType:value('studyType'), population:value('population'), inclusionCriteria:value('inclusionCriteria'), exclusionCriteria:value('exclusionCriteria'), mainVariable:value('mainVariable'), secondaryVariables:value('secondaryVariables'), dataSource:value('dataSource'), personalData:value('personalData'), vulnerable:value('vulnerable'), biologicalSamples:value('biologicalSamples'), interventionPatients:value('interventionPatients'), medProducts:value('medProducts'), informedConsent:value('informedConsent'), sampleSize:value('sampleSize'), timeline:value('timeline'), center:value('center'), principalInvestigator:value('principalInvestigator')}; }
 
 function isEssentialComplete(v, key) {
   const raw = (v[key] || '').trim();
@@ -96,7 +96,10 @@ function buildAlerts(v){
   if (hasMedicationSignals) a.push('Valorar si el estudio se considera estudio observacional con medicamentos según RD 957/2020 o ensayo clínico según RD 1090/2015. Probable necesidad de CEIm.');
   if (/(eficacia|seguridad|supervivencia global|progresión|eventos adversos)/i.test(mergedText)) a.push('Defina claramente variable principal, periodo de seguimiento, fuente de datos y plan estadístico.');
   if (/medir supervivencia global/i.test((v.mainObjective || '').toLowerCase())) a.push('Sugerencia de reformulación: “Evaluar la supervivencia global en pacientes con cáncer de mama tratados con pembrolizumab en el periodo X.”');
-  if (/es más alta que otros/i.test((v.question || '').toLowerCase())) a.push('La pregunta sugiere comparación pero falta comparador definido. Especifique grupo control/comparador.');
+  if (/es más alta que otros/i.test((v.question || '').toLowerCase()) || ((/compar|frente|vs/i.test(v.question+v.mainObjective) && !v.picoComparator))) a.push('La pregunta sugiere comparación pero falta comparador definido. Especifique grupo control/comparador.');
+  if (/oncolog|cancer/i.test(mergedText) && /hba1c/i.test(mergedText)) a.push('Posible incoherencia: en oncología, HbA1c rara vez es outcome principal salvo contextos específicos.');
+  if (/eficacia|efectividad/i.test(mergedText) && /casos y controles/i.test((v.studyType || '').toLowerCase())) a.push('Posible incoherencia: para eficacia de intervención, casos y controles suele no ser el diseño principal.');
+  if (/supervivencia/i.test(mergedText) && /(n\s*[<≤]\s*100|[1-4]?\d\s+pacientes?)/i.test((v.population||'').toLowerCase())) a.push('Alerta: muestra pequeña para outcome de supervivencia puede comprometer potencia y validez.');
   if (/prospectivo/i.test((v.studyType || '').toLowerCase()) && hasMedicationSignals) a.push('Diseño prospectivo con posible medicamento: valorar intervención, seguimiento, consentimiento y evaluación ética/CEIm.');
   if ((v.population || '').trim().toLowerCase() === '100 pacientes') a.push('“100 pacientes” no implica justificación muestral. Debe indicarse si es muestra disponible, consecutiva o cálculo formal.');
   if (/prom/i.test((v.secondaryVariables || '').toLowerCase())) a.push('Para PROM en variables secundarias: indique instrumento validado, versión, idioma, momento de medición y criterio de interpretación.');
@@ -134,7 +137,7 @@ function buildDraft(v, readiness){
     'Promotor, si aplica': MAY_NOT_APPLY,
     'Justificación y contexto': sanitizeText(v.justification, blocked),
     'Pregunta de investigación': sanitizeText(v.question, blocked),
-    'Hipótesis, si procede': MAY_NOT_APPLY,
+    'Hipótesis, si procede': sanitizeText(v.hypothesis, MAY_NOT_APPLY),
     'Objetivo principal': sanitizeText(v.mainObjective, blocked),
     'Objetivos secundarios': sanitizeText(v.secondaryObjectives, MAY_NOT_APPLY),
     'Diseño del estudio': sanitizeText(v.studyType, blocked),
@@ -168,13 +171,15 @@ function formatDraft(d, readiness){
   Object.entries(d.sections).forEach(([k,v])=>{lines.push(`${i}. ${k}`); lines.push(v); lines.push(''); i+=1;});
   lines.push('Checklist final para el investigador');
   d.checklist.forEach((c)=>lines.push(`[ ] ${c}`));
+  lines.push('','Recomendaciones inteligentes generadas por la herramienta');
+  buildAlerts(latestValues || {}).slice(0,6).forEach((al)=>lines.push(`- ${al}`));
   lines.push('', AUTHOR_CREDIT);
   return lines.join('\n');
 }
 
 function renderAlerts(a){validationAlerts.innerHTML = a.length ? `<div class="alert-box">${a.map((x)=>`<p>⚠️ ${x}</p>`).join('')}</div>` : '';}
 function updateChecklist(items){dynamicChecklist.innerHTML=''; items.forEach((it)=>{const li=document.createElement('li'); li.textContent=it; dynamicChecklist.appendChild(li);});}
-function updateProgress(){const v=collectValues(); const filled=Object.values(v).filter(Boolean).length; const currentStep=Math.min(Math.max(filled,1),totalSteps); const percent=Math.max(0,Math.min(100,Math.round((currentStep/totalSteps)*100))); progressBar.style.width=`${percent}%`; progressText.textContent=`Paso ${currentStep} de ${totalSteps}`; progressPercent.textContent=`${percent}%`;
+function updateProgress(){const v=collectValues(); const filled=Object.values(v).filter(Boolean).length; const currentStep=Math.min(Math.max(filled,0),totalSteps); const percent=Math.max(0,Math.min(100,Math.round((currentStep/totalSteps)*100))); progressBar.style.width=`${percent}%`; progressText.textContent=`Paso ${currentStep} de ${totalSteps}`; progressPercent.textContent=`${percent}%`;
   const track=document.querySelector('.progress-track');
   if(track) track.setAttribute('aria-valuenow', String(percent));}
 
@@ -182,8 +187,15 @@ form.addEventListener('input', ()=>{const v=collectValues(); const readiness=eva
 form.addEventListener('submit', (e)=>{e.preventDefault(); const v=collectValues(); const readiness=evaluateProjectReadiness(v); const d=buildDraft(v, readiness); const t=formatDraft(d, readiness); latestValues=v; latestDraftData=d; latestDraftText=t; latestReadiness=readiness; output.querySelector('.status-message').textContent = readiness.shouldGenerateProtocol ? 'Borrador generado correctamente.' : 'Madurez insuficiente: se generará un informe de madurez.'; previewText.textContent=t; updateChecklist(d.checklist); renderMaturityCard(readiness); downloadReadinessButton.disabled=false; downloadProtocolButton.disabled=false;});
 copyButton.addEventListener('click', async ()=>{if(!latestDraftText)return; await navigator.clipboard.writeText(latestDraftText);});
 downloadReadinessButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolPdf) window.generateProtocolPdf(latestValues, latestDraftData, latestReadiness, 'readiness');});
-downloadProtocolButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolPdf){ if(!latestReadiness.shouldGenerateProtocol) alert('El protocolo se generará con apartados pendientes y no debería presentarse todavía a evaluación.'); window.generateProtocolPdf(latestValues, latestDraftData, latestReadiness, 'protocol'); }});
+downloadProtocolButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolPdf){ const required=['title','mainObjective','studyType','population','mainVariable','dataSource']; const ethicsOk=latestValues.personalData!=='No lo sé' && latestValues.informedConsent!=='No lo sé'; const missing=required.filter((k)=>!(latestValues[k]||'').trim()); if(missing.length || !ethicsOk){ alert('Bloqueado: faltan campos mínimos para protocolo completo (título, objetivo, diseño, población, variable principal, fuente de datos y ética básica).'); return; } window.generateProtocolPdf(latestValues, latestDraftData, latestReadiness, 'protocol'); }});
 resetButton.addEventListener('click', ()=>{form.reset(); latestValues=null; latestDraftData=null; latestDraftText=''; latestReadiness=null; previewText.textContent='Aún no hay contenido generado.'; output.querySelector('.status-message').textContent='Completa el formulario y pulsa “Generar borrador”.'; validationAlerts.innerHTML=''; downloadReadinessButton.disabled=true; downloadProtocolButton.disabled=true; maturityCard.hidden=true; updateChecklist(['Genera un borrador para ver la checklist personalizada.']); updateProgress();});
 
 document.querySelectorAll('.tab-btn').forEach((btn)=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn,.tab-panel').forEach((el)=>el.classList.remove('active')); btn.classList.add('active'); document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');}));
 updateProgress();
+
+
+const templates={TFG:{projectType:'TFG'},'cohorte':{studyType:'Cohorte'},'casos-control':{studyType:'Casos y controles'},'ensayo':{studyType:'Ensayo clínico'},'revision':{studyType:'Revisión sistemática'},'farmacia-hospitalaria':{area:'Farmacia Hospitalaria'},'oncologia':{area:'Oncología'},'prom':{mainVariable:'PROM validado'}};
+document.getElementById('templateSelector')?.addEventListener('change',(e)=>{const t=templates[e.target.value]||{};Object.entries(t).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});updateProgress();});
+
+const zAlpha={0.05:1.96,0.01:2.58};const zPower={0.8:0.84,0.9:1.28};
+document.getElementById('sampleCalcButton')?.addEventListener('click',()=>{const type=value('calcType');const a=parseFloat(value('calcAlpha'))||0.05;const p=parseFloat(value('calcPower'))||0.8;const d=parseFloat(value('calcEffect'))||0.5;const drop=(parseFloat(value('calcDropout'))||0)/100;const za=zAlpha[a]||1.96;const zb=zPower[p]||0.84;let n=0;if(type==='medias'){n=2*((za+zb)**2)/(d**2);}else if(type==='proporciones'){n=2*((za+zb)**2)*0.25/(d**2);}else{n=((za**2)*0.25)/(d**2);}const adjusted=Math.ceil(n/(1-drop));document.getElementById('sampleCalcResult').textContent=`n aproximado: ${Math.ceil(n)} (ajustado por pérdidas: ${adjusted})`;const ss=document.getElementById('sampleSize');if(ss && !ss.value) ss.value=`${adjusted} participantes (estimación rápida)`;updateProgress();});
