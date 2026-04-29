@@ -122,12 +122,16 @@
 
       <section class="card output-card" aria-labelledby="output-title">
         <h2 id="output-title">Borrador generado</h2>
-        <p class="muted">Aquí aparecerá tu estructura inicial para revisar con tu tutor o comité.</p>
-        <pre id="output" class="output" aria-live="polite">Completa el formulario y pulsa “Generar borrador”.</pre>
+        <p class="muted">Genera un borrador profesional en PDF para revisar con tu tutor o comité.</p>
+        <div id="output" class="output-panel" aria-live="polite">
+          <p class="status-message">Completa el formulario y pulsa “Generar borrador”.</p>
+          <p class="preview-title">Vista previa breve</p>
+          <p id="previewText" class="preview-text">Aún no hay contenido generado.</p>
+        </div>
 
         <div class="actions">
-          <button type="button" class="btn" id="copyButton">Copiar resultado</button>
-          <button type="button" class="btn" id="downloadButton">Descargar .txt</button>
+          <button type="button" class="btn" id="copyButton">Copiar resumen</button>
+          <button type="button" class="btn" id="downloadPdfButton" disabled>Descargar PDF</button>
         </div>
       </section>
     </main>
@@ -190,6 +194,8 @@
       </small>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <script src="assets/pdf-generator.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

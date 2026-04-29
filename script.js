@@ -1,12 +1,16 @@
 const form = document.getElementById('projectForm');
 const output = document.getElementById('output');
 const copyButton = document.getElementById('copyButton');
-const downloadButton = document.getElementById('downloadButton');
+const downloadPdfButton = document.getElementById('downloadPdfButton');
 const resetButton = document.getElementById('resetButton');
+const previewText = document.getElementById('previewText');
 const progressBar = document.getElementById('progressBar');
 const progressText = document.getElementById('progressText');
 const progressPercent = document.getElementById('progressPercent');
 const totalSteps = 8;
+let latestDraftText = "";
+let latestValues = null;
+let latestDraftData = null;
 
 const STUDY_RULES = {
   'Observacional transversal': {
@@ -699,14 +703,28 @@ form.addEventListener('submit', (event) => {
   const values = collectValues();
   const draftData = buildDraft(values);
   const text = formatDraft(draftData, values);
+  const missingCore = [values.idea, values.population, values.mainVariable, values.studyType].filter(Boolean).length < 3;
 
-  output.textContent = text;
+  latestValues = values;
+  latestDraftData = draftData;
+  latestDraftText = text;
+
+  const baseMessage = 'Borrador generado correctamente. Descargue el PDF para revisar y adaptar el protocolo.';
+  const warning = missingCore ? ' El PDF se ha generado con apartados pendientes de completar.' : '';
+  output.querySelector('.status-message').textContent = `${baseMessage}${warning}`;
+  previewText.textContent = [
+    `Título provisional: ${draftData.title}`,
+    `Diseño sugerido: ${draftData.studyType}`,
+    `Objetivo general: ${draftData.overallGoal}`
+  ].join('\n');
+
+  downloadPdfButton.disabled = false;
 });
 
 copyButton.addEventListener('click', async () => {
-  if (!output.textContent) return;
+  if (!latestDraftText) return;
   try {
-    await navigator.clipboard.writeText(output.textContent);
+    await navigator.clipboard.writeText(latestDraftText);
     copyButton.textContent = '¡Copiado!';
     setTimeout(() => {
       copyButton.textContent = 'Copiar resultado';
@@ -719,19 +737,19 @@ copyButton.addEventListener('click', async () => {
   }
 });
 
-downloadButton.addEventListener('click', () => {
-  const blob = new Blob([output.textContent], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'borrador_ayudainvestigacion.txt';
-  link.click();
-  URL.revokeObjectURL(url);
+downloadPdfButton.addEventListener('click', () => {
+  if (!latestValues || !latestDraftData || typeof window.generateProtocolPdf !== 'function') return;
+  window.generateProtocolPdf(latestValues, latestDraftData);
 });
 
 resetButton.addEventListener('click', () => {
   form.reset();
-  output.textContent = 'Completa el formulario y pulsa “Generar borrador”.';
+  output.querySelector('.status-message').textContent = 'Completa el formulario y pulsa “Generar borrador”.';
+  previewText.textContent = 'Aún no hay contenido generado.';
+  latestDraftText = '';
+  latestValues = null;
+  latestDraftData = null;
+  downloadPdfButton.disabled = true;
   updateProgress();
 });
 

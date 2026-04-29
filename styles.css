@@ -182,15 +182,32 @@ textarea:focus {
   background: var(--primary-dark);
 }
 
-.output {
-  min-height: 380px;
-  background: #0f1724;
-  color: #edf4ff;
+.output-panel {
+  min-height: 220px;
+  background: #f8faff;
+  color: var(--text);
   padding: 1rem;
   border-radius: 10px;
-  overflow-x: auto;
+  border: 1px solid #d6e2f7;
+}
+
+.status-message {
+  margin: 0 0 0.6rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+.preview-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.92rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.preview-text {
+  margin: 0;
   white-space: pre-wrap;
-  border: 1px solid #203354;
 }
 
 .footer {
