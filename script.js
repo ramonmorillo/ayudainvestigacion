@@ -3,6 +3,7 @@ const output = document.getElementById('output');
 const copyButton = document.getElementById('copyButton');
 const downloadReadinessButton = document.getElementById('downloadReadinessButton');
 const downloadProtocolButton = document.getElementById('downloadProtocolButton');
+const downloadDocxButton = document.getElementById('downloadDocxButton');
 const resetButton = document.getElementById('resetButton');
 const previewText = document.getElementById('previewText');
 const progressBar = document.getElementById('progressBar');
@@ -21,6 +22,7 @@ let latestDraftText = '';
 let latestValues = null;
 let latestDraftData = null;
 let latestReadiness = null;
+let latestQualityScore = 0;
 
 const PENDING = 'Pendiente de completar por el investigador principal.';
 const MAY_NOT_APPLY = 'Este apartado puede no aplicar según el tipo de estudio y debe ser revisado por el investigador principal.';
@@ -79,6 +81,69 @@ function evaluateProjectReadiness(v) {
   return { status, completion, completed, pending, shouldGenerateProtocol: level >= 1, recommendation, maturityWarning, regulatoryCritical };
 }
 
+
+
+function buildGuidedJustification(v) {
+  const magnitude = v.picoPopulation || v.population || 'la población objetivo';
+  const current = v.dataSource || 'la práctica clínica actual';
+  const gap = v.question || 'la pregunta de investigación aún no resuelta';
+  const expected = v.mainObjective || 'la mejora de decisiones clínicas/metodológicas';
+  return `Magnitud del problema: el proyecto aborda una necesidad relevante en ${magnitude}. Situación actual: la evidencia disponible en ${current} es heterogénea y con variabilidad de práctica. Gap de conocimiento: persisten incertidumbres sobre ${gap}. Valor esperado: el estudio puede aportar evidencia útil para ${expected} y mejorar la toma de decisiones.`;
+}
+
+function buildRecommendedBibliography(v) {
+  const area = (v.area || '').toLowerCase();
+  const topic = [v.title, v.question, v.mainVariable].join(' ').toLowerCase();
+  const isOnco = /oncolog|cancer/.test(area + ' ' + topic);
+  const isCardio = /cardio|insuficiencia|infarto|hipertensi/.test(area + ' ' + topic);
+  const core = [
+    'Guías clínicas: documento de sociedad científica principal del área (última versión).',
+    'Ensayos pivotales: estudios fase III que sustentan el estándar terapéutico actual.',
+    'Revisiones sistemáticas/meta-análisis recientes en PubMed/Cochrane.',
+    'Real world evidence: cohortes multicéntricas y registros nacionales/internacionales.',
+    'Normativa: RGPD/LOPDGDD, RD 957/2020 y RD 1090/2015 (si aplica).',
+    'Metodología: STROBE/CONSORT/PRISMA según diseño.'
+  ];
+  if (isOnco) core.unshift('Oncología: priorizar guías ESMO/NCCN y outcomes RECIST, SG, SLP, PRO-CTCAE/PROM validados.');
+  if (isCardio) core.unshift('Cardiología: priorizar guías ESC/AHA, endpoints MACE y definición estandarizada de eventos.');
+  return core;
+}
+
+function detectClinicalIncoherence(v) {
+  const text = [v.area, v.title, v.question, v.mainVariable, v.secondaryVariables].join(' ').toLowerCase();
+  if (/oncolog|cancer/.test(text) && /artritis reumatoide/.test(text) && /hba1c/.test(text)) {
+    return 'ALERTA ROJA: combinación clínica incoherente (oncología + artritis reumatoide + HbA1c) salvo justificación explícita de comorbilidad y objetivo metabólico.';
+  }
+  return '';
+}
+
+function improveHypothesis(v) {
+  const raw = (v.hypothesis || '').trim();
+  if (!raw || raw.length < 20 || /^el\s+\w+\s+es\s+mejor/i.test(raw)) {
+    return `Hipótesis formal sugerida: En ${v.picoPopulation || 'la población definida'}, la intervención/exposición ${v.picoIntervention || 'de interés'} se asocia con ${v.picoOutcome || 'una mejoría clínicamente relevante en la variable principal'} frente a ${v.picoComparator || 'el comparador estándar'}, ajustando por factores de confusión preespecificados.`;
+  }
+  return raw;
+}
+
+function expectedBiasesByDesign(studyType = '') {
+  const s = studyType.toLowerCase();
+  if (s.includes('cohorte')) return ['Sesgo de selección', 'Confusión residual', 'Pérdidas durante seguimiento'];
+  if (s.includes('casos')) return ['Sesgo de recuerdo', 'Sesgo de selección de controles', 'Confusión'];
+  if (s.includes('ensayo')) return ['Sesgo de desempeño', 'Sesgo de detección', 'Pérdidas y desviaciones del protocolo'];
+  if (s.includes('revisión')) return ['Sesgo de publicación', 'Heterogeneidad clínica/metodológica', 'Riesgo de sesgo de estudios incluidos'];
+  return ['Sesgo de selección', 'Sesgo de información', 'Confusión'];
+}
+
+function computeQualityScore(v, readiness) {
+  const required = ['question', 'mainObjective', 'studyType', 'population', 'mainVariable', 'dataSource'];
+  let score = 20 + Math.round(readiness.completion * 0.5);
+  score += required.filter((k) => (v[k] || '').trim().length > 5).length * 5;
+  if (v.informedConsent !== 'No lo sé' && v.personalData !== 'No lo sé') score += 10;
+  if ((v.hypothesis || '').trim().length > 30) score += 5;
+  if ((v.justification || '').trim().length > 40) score += 5;
+  return Math.max(0, Math.min(100, score));
+}
+
 function buildAlerts(v){
   const a=[];
   const mergedText = [v.title, v.question, v.mainObjective, v.picoIntervention, v.studyType, v.mainVariable, v.secondaryVariables].join(' ').toLowerCase();
@@ -101,6 +166,8 @@ function buildAlerts(v){
   if (/eficacia|efectividad/i.test(mergedText) && /casos y controles/i.test((v.studyType || '').toLowerCase())) a.push('Posible incoherencia: para eficacia de intervención, casos y controles suele no ser el diseño principal.');
   if (/supervivencia/i.test(mergedText) && /(n\s*[<≤]\s*100|[1-4]?\d\s+pacientes?)/i.test((v.population||'').toLowerCase())) a.push('Alerta: muestra pequeña para outcome de supervivencia puede comprometer potencia y validez.');
   if (/prospectivo/i.test((v.studyType || '').toLowerCase()) && hasMedicationSignals) a.push('Diseño prospectivo con posible medicamento: valorar intervención, seguimiento, consentimiento y evaluación ética/CEIm.');
+  const incoherence = detectClinicalIncoherence(v);
+  if (incoherence) a.push(incoherence);
   if ((v.population || '').trim().toLowerCase() === '100 pacientes') a.push('“100 pacientes” no implica justificación muestral. Debe indicarse si es muestra disponible, consecutiva o cálculo formal.');
   if (/prom/i.test((v.secondaryVariables || '').toLowerCase())) a.push('Para PROM en variables secundarias: indique instrumento validado, versión, idioma, momento de medición y criterio de interpretación.');
   return a;
@@ -130,14 +197,20 @@ function buildDraft(v, readiness){
   const pendingInfo = readiness.pending.map((f) => f.label);
   const sample = v.sampleSize ? sanitizeText(v.sampleSize) : 'No se ha definido tamaño muestral. Se recomienda justificarlo según diseño, efecto esperado, precisión, potencia, alfa, pérdidas y factibilidad.';
   const blocked = 'Este apartado requiere ser completado porque condiciona la validez metodológica del estudio. Debe especificarse antes de presentar el proyecto a tutor, unidad metodológica o CEI/CEIm.';
+  const guidedJustification = buildGuidedJustification(v);
+  const recommendedBibliography = buildRecommendedBibliography(v);
+  const improvedHypothesis = improveHypothesis(v);
+  const biases = expectedBiasesByDesign(v.studyType);
+  const qualityScore = computeQualityScore(v, readiness);
+  latestQualityScore = qualityScore;
   return { mode: readiness.shouldGenerateProtocol ? 'protocol' : 'readiness', note: NOTE, checklist: buildChecklist(v), pendingInfo, sections: {
     'Título': sanitizeText(v.title),
     'Versión y fecha': `Versión 1.0 · ${new Date().toISOString().slice(0,10)}`,
     'Investigador principal y equipo': sanitizeText(v.principalInvestigator, MAY_NOT_APPLY),
     'Promotor, si aplica': MAY_NOT_APPLY,
-    'Justificación y contexto': sanitizeText(v.justification, blocked),
+    'Justificación y contexto': sanitizeText(v.justification || guidedJustification, blocked),
     'Pregunta de investigación': sanitizeText(v.question, blocked),
-    'Hipótesis, si procede': sanitizeText(v.hypothesis, MAY_NOT_APPLY),
+    'Hipótesis, si procede': sanitizeText(improvedHypothesis, MAY_NOT_APPLY),
     'Objetivo principal': sanitizeText(v.mainObjective, blocked),
     'Objetivos secundarios': sanitizeText(v.secondaryObjectives, MAY_NOT_APPLY),
     'Diseño del estudio': sanitizeText(v.studyType, blocked),
@@ -148,6 +221,7 @@ function buildDraft(v, readiness){
     'Fuente de datos': sanitizeText(v.dataSource, blocked),
     'Tamaño muestral': sample,
     'Análisis estadístico orientativo': blocked,
+    'Sesgos esperables según diseño': biases.join('. ') + '.',
     'Gestión de datos y confidencialidad': v.personalData==='Sí'?'Aplicar minimización, control de accesos, seudonimización y base legal del tratamiento con autorización institucional.':MAY_NOT_APPLY,
     'Consideraciones éticas': sanitizeText(v.informedConsent, blocked),
     'Consentimiento informado o exención': sanitizeText(v.informedConsent, blocked),
@@ -156,12 +230,16 @@ function buildDraft(v, readiness){
     'Plan de trabajo': sanitizeText(v.timeline, MAY_NOT_APPLY)
     ,'Difusión de resultados': blocked,
     'Documentación/anexos recomendados': 'Protocolo versionado, hoja de información al participante, consentimiento/exención, autorización de centro, plan de protección de datos y anexos técnicos aplicables.',
-    'Checklist final para el investigador': 'Revise la checklist operativa del panel de salida antes de exportar el documento.'
+    'Checklist final para el investigador': 'Revise la checklist operativa del panel de salida antes de exportar el documento.',
+    'Bibliografía recomendada inicial': recommendedBibliography.map((x, i) => `${i + 1}) ${x}`).join('\n'),
+    'Score de calidad metodológica (0-100)': String(qualityScore)
   }};
 }
 
 function formatDraft(d, readiness){
   const lines=[d.note,'',`Nivel de madurez: ${readiness.status} (${readiness.completion}%)`,''];
+  lines.push('Campos obligatorios mínimos: pregunta, objetivo, diseño, población, variable principal, fuente de datos y ética básica.');
+  lines.push('');
   if (d.pendingInfo.length) {
     lines.push('Información pendiente de completar:');
     d.pendingInfo.forEach((p) => lines.push(`- ${p}`));
@@ -184,11 +262,11 @@ function updateProgress(){const v=collectValues(); const filled=Object.values(v)
   if(track) track.setAttribute('aria-valuenow', String(percent));}
 
 form.addEventListener('input', ()=>{const v=collectValues(); const readiness=evaluateProjectReadiness(v); latestReadiness=readiness; renderAlerts(buildAlerts(v)); renderMaturityCard(readiness); updateProgress();});
-form.addEventListener('submit', (e)=>{e.preventDefault(); const v=collectValues(); const readiness=evaluateProjectReadiness(v); const d=buildDraft(v, readiness); const t=formatDraft(d, readiness); latestValues=v; latestDraftData=d; latestDraftText=t; latestReadiness=readiness; output.querySelector('.status-message').textContent = readiness.shouldGenerateProtocol ? 'Borrador generado correctamente.' : 'Madurez insuficiente: se generará un informe de madurez.'; previewText.textContent=t; updateChecklist(d.checklist); renderMaturityCard(readiness); downloadReadinessButton.disabled=false; downloadProtocolButton.disabled=false;});
+form.addEventListener('submit', (e)=>{e.preventDefault(); const v=collectValues(); const readiness=evaluateProjectReadiness(v); const d=buildDraft(v, readiness); const t=formatDraft(d, readiness); latestValues=v; latestDraftData=d; latestDraftText=t; latestReadiness=readiness; output.querySelector('.status-message').textContent = readiness.shouldGenerateProtocol ? 'Borrador generado correctamente.' : 'Madurez insuficiente: se generará un informe de madurez.'; previewText.textContent=t; updateChecklist(d.checklist); renderMaturityCard(readiness); downloadReadinessButton.disabled=false; downloadProtocolButton.disabled=false; if(downloadDocxButton) downloadDocxButton.disabled=false;});
 copyButton.addEventListener('click', async ()=>{if(!latestDraftText)return; await navigator.clipboard.writeText(latestDraftText);});
 downloadReadinessButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolPdf) window.generateProtocolPdf(latestValues, latestDraftData, latestReadiness, 'readiness');});
-downloadProtocolButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolPdf){ const required=['title','mainObjective','studyType','population','mainVariable','dataSource']; const ethicsOk=latestValues.personalData!=='No lo sé' && latestValues.informedConsent!=='No lo sé'; const missing=required.filter((k)=>!(latestValues[k]||'').trim()); if(missing.length || !ethicsOk){ alert('Bloqueado: faltan campos mínimos para protocolo completo (título, objetivo, diseño, población, variable principal, fuente de datos y ética básica).'); return; } window.generateProtocolPdf(latestValues, latestDraftData, latestReadiness, 'protocol'); }});
-resetButton.addEventListener('click', ()=>{form.reset(); latestValues=null; latestDraftData=null; latestDraftText=''; latestReadiness=null; previewText.textContent='Aún no hay contenido generado.'; output.querySelector('.status-message').textContent='Completa el formulario y pulsa “Generar borrador”.'; validationAlerts.innerHTML=''; downloadReadinessButton.disabled=true; downloadProtocolButton.disabled=true; maturityCard.hidden=true; updateChecklist(['Genera un borrador para ver la checklist personalizada.']); updateProgress();});
+downloadProtocolButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolPdf){ const required=['question','mainObjective','studyType','population','mainVariable','dataSource']; const ethicsOk=latestValues.personalData!=='No lo sé' && latestValues.informedConsent!=='No lo sé'; const missing=required.filter((k)=>!(latestValues[k]||'').trim()); if(missing.length || !ethicsOk){ alert('Bloqueado: faltan campos mínimos para protocolo completo (título, objetivo, diseño, población, variable principal, fuente de datos y ética básica).'); return; } window.generateProtocolPdf(latestValues, latestDraftData, latestReadiness, 'protocol'); }});
+resetButton.addEventListener('click', ()=>{form.reset(); latestValues=null; latestDraftData=null; latestDraftText=''; latestReadiness=null; previewText.textContent='Aún no hay contenido generado.'; output.querySelector('.status-message').textContent='Completa el formulario y pulsa “Generar borrador”.'; validationAlerts.innerHTML=''; downloadReadinessButton.disabled=true; downloadProtocolButton.disabled=true; if(downloadDocxButton) downloadDocxButton.disabled=true; maturityCard.hidden=true; updateChecklist(['Genera un borrador para ver la checklist personalizada.']); updateProgress();});
 
 document.querySelectorAll('.tab-btn').forEach((btn)=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn,.tab-panel').forEach((el)=>el.classList.remove('active')); btn.classList.add('active'); document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');}));
 updateProgress();
@@ -199,3 +277,5 @@ document.getElementById('templateSelector')?.addEventListener('change',(e)=>{con
 
 const zAlpha={0.05:1.96,0.01:2.58};const zPower={0.8:0.84,0.9:1.28};
 document.getElementById('sampleCalcButton')?.addEventListener('click',()=>{const type=value('calcType');const a=parseFloat(value('calcAlpha'))||0.05;const p=parseFloat(value('calcPower'))||0.8;const d=parseFloat(value('calcEffect'))||0.5;const drop=(parseFloat(value('calcDropout'))||0)/100;const za=zAlpha[a]||1.96;const zb=zPower[p]||0.84;let n=0;if(type==='medias'){n=2*((za+zb)**2)/(d**2);}else if(type==='proporciones'){n=2*((za+zb)**2)*0.25/(d**2);}else{n=((za**2)*0.25)/(d**2);}const adjusted=Math.ceil(n/(1-drop));document.getElementById('sampleCalcResult').textContent=`n aproximado: ${Math.ceil(n)} (ajustado por pérdidas: ${adjusted})`;const ss=document.getElementById('sampleSize');if(ss && !ss.value) ss.value=`${adjusted} participantes (estimación rápida)`;updateProgress();});
+
+if (downloadDocxButton) downloadDocxButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolDocx){ const required=['question','mainObjective','studyType','population','mainVariable','dataSource']; const ethicsOk=latestValues.personalData!=='No lo sé' && latestValues.informedConsent!=='No lo sé'; const missing=required.filter((k)=>!(latestValues[k]||'').trim()); if(missing.length || !ethicsOk){ alert('Bloqueado: faltan campos mínimos para exportar Word completo (pregunta, objetivo, diseño, población, variable principal, fuente de datos y ética básica).'); return; } window.generateProtocolDocx(latestValues, latestDraftData, latestReadiness, 'protocol'); }});
