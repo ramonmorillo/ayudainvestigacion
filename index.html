@@ -154,11 +154,40 @@
 
       </section>
       <section id="tab-checklist" class="tab-panel card"><h2>Checklist inteligente</h2><ul id="dynamicChecklist"><li>Genera un borrador para ver la checklist personalizada.</li></ul></section>
-      <section id="tab-about" class="tab-panel card"><h2>Acerca de AyudaInvestigacion</h2>
-        <p>AyudaInvestigacion es una herramienta gratuita y general para diseñar proyectos de investigación en fases iniciales.</p>
-        <p>Autoría: Ramón Morillo (abril de 2026). Se muestra de forma discreta en pie de página y en el PDF exportado.</p>
+      <section id="tab-about" class="tab-panel card about-panel">
+        <h2>Acerca de AyudaInvestigacion</h2>
+        <p>Consulta la información completa de autoría, base metodológica, independencia y limitaciones en el modal institucional.</p>
+        <button type="button" class="btn primary" id="openAboutModal">Ver “Acerca de” completo</button>
       </section>
     </main>
+    <div id="aboutModal" class="modal-overlay" aria-hidden="true">
+      <section class="about-modal" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle">
+        <button type="button" class="modal-close" id="closeAboutModal" aria-label="Cerrar">×</button>
+        <h2 id="aboutModalTitle">AYUDAINVESTIGACION</h2>
+        <p class="about-subtitle">Creado por Ramón Morillo · Abril 2026</p>
+        <h3>1. AUTORÍA</h3>
+        <p><strong>Desarrollado por:</strong><br />Ramón Morillo</p>
+        <p><strong>Asistencia técnica:</strong><br />Desarrollo asistido mediante herramientas de inteligencia artificial y modelos de lenguaje.</p>
+        <h3>2. BASE METODOLÓGICA</h3>
+        <p>AyudaInvestigacion se fundamenta en principios ampliamente aceptados de metodología de la investigación:</p>
+        <ul><li>Formulación estructurada de preguntas de investigación</li><li>Diseño de protocolos</li><li>Coherencia entre pregunta, objetivos, diseño, población y variables</li><li>Evaluación de factibilidad</li><li>Revisión de aspectos éticos y regulatorios</li><li>Preparación de documentación para revisión por tutor, unidad metodológica o comité correspondiente</li></ul>
+        <p>Conceptos metodológicos relacionados:</p>
+        <ul><li>Validez científica</li><li>Relevancia de la pregunta</li><li>Adecuación del diseño</li><li>Definición operativa de variables</li><li>Control de sesgos</li><li>Protección de participantes</li><li>Transparencia y reproducibilidad</li></ul>
+        <h3>3. DECLARACIÓN DE INDEPENDENCIA</h3>
+        <p>AyudaInvestigacion es una herramienta independiente. No está afiliada, respaldada ni certificada oficialmente por:</p>
+        <ul><li>Comités de Ética de la Investigación</li><li>Agencias reguladoras</li><li>Instituciones sanitarias</li><li>Universidades</li><li>Sociedades científicas</li></ul>
+        <h3>4. USO PREVISTO Y LIMITACIONES</h3>
+        <p>AyudaInvestigacion:</p>
+        <ul><li>NO sustituye la revisión metodológica experta</li><li>NO constituye una aprobación ética</li><li>NO reemplaza la evaluación de un CEI/CEIm cuando sea aplicable</li><li>NO garantiza la aceptación de un proyecto por una convocatoria, tutor, universidad o comité</li><li>Funciona como herramienta de apoyo orientativa para jóvenes investigadores</li></ul>
+        <p>Los resultados obtenidos:</p>
+        <ul><li>Dependen de la información introducida</li><li>Requieren interpretación profesional</li><li>Deben revisarse con tutor, investigador principal, unidad metodológica o comité correspondiente</li><li>No garantizan conformidad regulatoria</li></ul>
+        <h3>5. DERECHOS Y LICENCIA</h3>
+        <p>© 2026 Ramón Morillo. Todos los derechos reservados.</p>
+        <p>Queda prohibida la reproducción, redistribución o modificación total o parcial sin autorización expresa del autor.</p>
+        <h3>6. AVISO FINAL</h3>
+        <p>El uso de la herramienta implica aceptar que los documentos generados son borradores orientativos y deben ser revisados antes de cualquier uso académico, institucional, ético o regulatorio.</p>
+      </section>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="assets/pdf-generator.js"></script>

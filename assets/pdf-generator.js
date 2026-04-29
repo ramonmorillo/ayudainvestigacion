@@ -1,6 +1,6 @@
 (function () {
   const NOTE_TEXT = 'Este documento es un borrador orientativo. No sustituye la revisión metodológica, ética, legal, regulatoria ni la evaluación por el CEI/CEIm correspondiente. El investigador principal es responsable de revisar, completar, justificar y adaptar el protocolo a la normativa vigente, al centro y al tipo de investigación.';
-  const CREDIT = 'Herramienta creada por Ramón Morillo. Abril de 2026.';
+  const CREDIT = 'Autoría: Ramón Morillo · Abril 2026';
 
   window.generateProtocolPdf = function generateProtocolPdf(values, draftData, readiness, mode = 'protocol') {
     const { jsPDF } = window.jspdf;
@@ -78,6 +78,8 @@
       heading('Campos críticos a completar', 11);
       draftData.pendingInfo.forEach((x) => p(`- ${x}`, 10));
     }
+    heading('Autoría y limitaciones de uso', 11);
+    p('AyudaInvestigacion es una herramienta orientativa para jóvenes investigadores. No sustituye revisión experta metodológica, ética, legal ni regulatoria.', 9);
 
     const pages = doc.getNumberOfPages();
     for (let i = 1; i <= pages; i += 1) {
