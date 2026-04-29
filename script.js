@@ -273,7 +273,26 @@ function formatDraft(d, readiness){
 
 function renderAlerts(a){validationAlerts.innerHTML = a.length ? `<div class="alert-box">${a.map((x)=>`<p>⚠️ ${x}</p>`).join('')}</div>` : '';}
 function updateChecklist(items){dynamicChecklist.innerHTML=''; items.forEach((it)=>{const li=document.createElement('li'); li.textContent=it; dynamicChecklist.appendChild(li);});}
-function updateProgress(){const v=collectValues(); const filled=Object.values(v).filter(Boolean).length; const currentStep=Math.min(Math.max(filled,0),totalSteps); const percent=Math.max(0,Math.min(100,Math.round((currentStep/totalSteps)*100))); progressBar.style.width=`${percent}%`; progressText.textContent=`Paso ${currentStep} de ${totalSteps}`; progressPercent.textContent=`${percent}%`;
+function getCompletedFields(formData){
+  let completed = 0;
+  const ignoredStrings = new Set(['Seleccionar plantilla...', 'Seleccionar...', 'No lo sé']);
+  for (const [key, value] of Object.entries(formData)) {
+    const field = document.getElementById(key);
+    if (field?.type === 'hidden' || field?.offsetParent === null) continue;
+    if (value === null || value === undefined) continue;
+    if (typeof value === 'string') {
+      const clean = value.trim();
+      if (clean !== '' && !ignoredStrings.has(clean)) completed += 1;
+    } else if (typeof value === 'boolean') {
+      if (value === true) completed += 1;
+    } else if (Array.isArray(value)) {
+      if (value.length > 0) completed += 1;
+    }
+  }
+  return completed;
+}
+
+function updateProgress(){const v=collectValues(); const filled=getCompletedFields(v); const currentStep=Math.min(Math.max(filled,0),totalSteps); const percent=Math.max(0,Math.min(100,Math.round((currentStep/totalSteps)*100))); progressBar.style.width=`${percent}%`; progressText.textContent=`${currentStep} de ${totalSteps} campos completados`; progressPercent.textContent=`${percent}%`;
   const track=document.querySelector('.progress-track');
   if(track) track.setAttribute('aria-valuenow', String(percent));}
 
