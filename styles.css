@@ -10,3 +10,8 @@
 .output-panel{min-height:460px;background:#f8faff;padding:1rem;border:1px solid #d6e2f7;border-radius:10px;overflow:auto}.preview-text{white-space:pre-wrap;font-size:.88rem}
 .grid-ethics{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.soft-alerts p{margin:.2rem 0;color:#7a4a00}
 @media (max-width:900px){.layout,.grid-ethics{grid-template-columns:1fr}}
+.progress-meta{display:flex;justify-content:space-between;margin:.25rem 0 .45rem;font-weight:600;color:#334155}
+.alert-box{background:#fff7e8;border:1px solid #ffd59a;border-radius:10px;padding:.55rem .7rem;margin:.2rem 0 .8rem}
+.soft-alerts p{margin:.2rem 0;color:#7a4a00}
+.cei-panel h3{margin-top:1rem;margin-bottom:.4rem}
+.cei-panel ul{margin:.2rem 0 .8rem 1.2rem}
