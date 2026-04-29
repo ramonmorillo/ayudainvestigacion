@@ -23,6 +23,7 @@ let latestValues = null;
 let latestDraftData = null;
 let latestReadiness = null;
 let latestQualityScore = 0;
+let latestQualityBreakdown = null;
 
 const PENDING = 'Pendiente de completar por el investigador principal.';
 const MAY_NOT_APPLY = 'Este apartado puede no aplicar según el tipo de estudio y debe ser revisado por el investigador principal.';
@@ -145,14 +146,57 @@ function expectedBiasesByDesign(studyType = '') {
   return ['Sesgo de selección', 'Sesgo de información', 'Confusión'];
 }
 
-function computeQualityScore(v, readiness) {
-  const required = ['question', 'mainObjective', 'studyType', 'population', 'mainVariable', 'dataSource'];
-  let score = 20 + Math.round(readiness.completion * 0.5);
-  score += required.filter((k) => (v[k] || '').trim().length > 5).length * 5;
-  if (v.informedConsent !== 'No lo sé' && v.personalData !== 'No lo sé') score += 10;
-  if ((v.hypothesis || '').trim().length > 30) score += 5;
-  if ((v.justification || '').trim().length > 40) score += 5;
-  return Math.max(0, Math.min(100, score));
+function computeQualityScore(v) {
+  const text = (x) => (x || '').trim();
+  const low = (x) => text(x).toLowerCase();
+  const garbage = (x) => { const t = low(x); return t && (t.length < 8 || /(asdf|sdf|prueba|test|pembro.*buen[ií]simo)/i.test(t)); };
+  const merged = [v.title, v.question, v.mainObjective, v.population, v.mainVariable, v.studyType].map(low).join(' ');
+  const hasMedication = /(pembrolizumab|nivolumab|inmunoterapia|fármacos?|medicamentos?|producto\s+sanitario)/i.test(merged) || v.medProducts === 'Sí';
+  const comparison = /(compar|frente|vs|mejor que|más eficaz)/i.test((v.question + ' ' + v.mainObjective).toLowerCase());
+  const noStatsPlan = !text(v.statisticalPlan || v.analysisPlan || '');
+  const hasActionVerb = ACTION_VERBS.some((verb) => low(v.mainObjective).startsWith(verb));
+  const b = { question: 0, objective: 0, coherence: 0, population: 0, variables: 0, feasibility: 0, ethics: 0, stats: 0 };
+  const reasons = [];
+  const caps = [];
+
+  if (!text(v.question) || !text(v.mainObjective)) caps.push({ max: 40, reason: 'Falta pregunta u objetivo principal' });
+  if (!text(v.studyType)) caps.push({ max: 50, reason: 'Falta diseño' });
+  if (!text(v.mainVariable)) caps.push({ max: 55, reason: 'Falta variable principal' });
+  if (!text(v.population)) caps.push({ max: 55, reason: 'Falta población' });
+  if (noStatsPlan) caps.push({ max: 75, reason: 'No hay plan estadístico' });
+  if (!text(v.sampleSize)) caps.push({ max: 80, reason: 'No hay tamaño muestral justificado' });
+  if ([v.question, v.mainObjective, v.population, v.mainVariable, v.studyType].some(garbage)) caps.push({ max: 35, reason: 'Texto basura en campos críticos' });
+
+  b.question = !text(v.question) ? 0 : garbage(v.question) ? 0 : Math.min(15, (text(v.question).length > 20 ? 12 : 5) + (/(poblaci|pacient|adult|niñ|oncolog)/i.test(low(v.question)) ? 2 : 0) + (/(intervenci|trat|exposici|compar|vs)/i.test(low(v.question)) ? 1 : 0));
+  if (garbage(v.mainObjective) || /(evaluar el objetivo|ver si funciona|estudiar cosas)/i.test(low(v.mainObjective))) b.objective = Math.min(3, text(v.mainObjective) ? 3 : 0);
+  else b.objective = Math.min(15, (hasActionVerb ? 5 : 1) + (/(pacient|poblaci|adult|niñ)/i.test(low(v.mainObjective) + low(v.population)) ? 3 : 0) + (/(intervenci|trat|fármaco|exposici)/i.test(low(v.mainObjective) + low(v.picoIntervention)) ? 3 : 0) + (/(outcome|variable|supervivencia|mortalidad|hba1c|prom)/i.test(low(v.mainObjective) + low(v.mainVariable)) ? 4 : 0));
+  b.coherence = Math.min(15, (text(v.studyType) ? 6 : 0) + (/(cohorte|ensayo|revisión|transversal|casos y controles)/i.test(low(v.studyType)) ? 4 : 0) + (comparison && text(v.picoComparator).length > 4 ? 5 : 0));
+  if (comparison && !text(v.picoComparator)) reasons.push('Comparación sin comparador definido');
+  if (/casos y controles/i.test(v.studyType) && /(eficacia|impacto|intervenci|prospectivo)/i.test(merged)) reasons.push('Diseño inadecuado para evaluar eficacia/impacto prospectivo');
+  b.population = Math.min(10, (text(v.population) ? 4 : 0) + (/(pacient|adult|niñ|diagnostic|criterios?)/i.test(low(v.population)) ? 2 : 0) + (text(v.center) ? 2 : 0) + (text(v.inclusionCriteria) && text(v.exclusionCriteria) ? 2 : 0));
+  b.variables = Math.min(15, (text(v.mainVariable) ? 5 : 0) + (/(supervivencia|mortalidad|respuesta|prom|hba1c)/i.test(low(v.mainVariable)) ? 2 : 0) + (text(v.secondaryVariables) ? 3 : 0) + (/(registro|historia|escala|instrumento|medici)/i.test(low(v.dataSource) + low(v.mainVariable)) ? 3 : 0) + (/(mes|año|semana|seguimiento|tiempo)/i.test([v.timeline, v.mainObjective, v.question].join(' ').toLowerCase()) ? 2 : 0));
+  if (/prom/i.test(low(v.mainVariable)) && !/(eortc|eq-5d|sf-36|sf36|instrumento|escala)/i.test(low(v.mainVariable) + low(v.secondaryVariables))) b.variables = Math.min(8, b.variables);
+  if (/(oncolog|cancer|mama|pembrolizumab)/i.test(merged) && /hba1c/i.test(low(v.mainVariable))) { b.variables = Math.min(3, b.variables); reasons.push('Variable principal incoherente con el tema (-20)'); }
+  b.feasibility = Math.min(10, (text(v.dataSource) ? 4 : 0) + (/(20\d{2}|periodo|año|mes)/i.test(low(v.dataSource) + low(v.timeline)) ? 3 : 0) + (text(v.sampleSize) ? 3 : 0));
+  if (/historias clínicas/i.test(v.dataSource || '') && !/(20\d{2}|periodo|año|mes)/i.test(low(v.dataSource) + low(v.timeline))) b.feasibility = Math.min(4, b.feasibility);
+  b.ethics = Math.min(10, ((v.personalData === 'Sí' || v.personalData === 'No') ? 2 : 0) + ((v.informedConsent && v.informedConsent !== 'No lo sé') ? 2 : 0) + ((text(v.ethicsCommittee || v.cei || '')) ? 2 : 0) + ((hasMedication ? (text(v.regulatoryFramework || v.regulation || '') ? 2 : 0) : 2)) + (/(seudonim|anonimiz|protecci[oó]n de datos|rgpd)/i.test([v.informedConsent, v.justification].join(' ').toLowerCase()) ? 2 : 0));
+  if (hasMedication && (v.informedConsent === 'No lo sé' || !text(v.ethicsCommittee || v.cei || '') || !text(v.regulatoryFramework || v.regulation || ''))) { b.ethics = Math.min(4, b.ethics); caps.push({ max: 60, reason: 'Medicamento/intervención sin CEI/consentimiento/regulación' }); reasons.push('Medicamento/eficacia sin ética-regulación clara (-20)'); }
+  b.stats = noStatsPlan ? 1 : Math.min(10, (/(descriptiv|media|mediana|frecuencia)/i.test(low(v.statisticalPlan || v.analysisPlan || '')) ? 2 : 0) + (/(regresi|t de student|chi|anova|cox|kaplan|modelo)/i.test(low(v.statisticalPlan || v.analysisPlan || '')) ? 4 : 1) + (/(confusi|ajust)/i.test(low(v.statisticalPlan || v.analysisPlan || '') + low(v.studyType)) ? 2 : 0) + (/(faltantes|imputaci|p[eé]rdidas|sensibilidad)/i.test(low(v.statisticalPlan || v.analysisPlan || '')) ? 2 : 0));
+
+  let score = Object.values(b).reduce((a, n) => a + n, 0);
+  if (!text(v.dataSource)) { score -= 15; reasons.push('Ausencia de fuente de datos (-15)'); }
+  if (!text(v.studyType)) { score -= 15; reasons.push('Ausencia de diseño (-15)'); }
+  if (!text(v.mainVariable)) { score -= 15; reasons.push('Ausencia de variable principal (-15)'); }
+  if (!text(v.population)) { score -= 15; reasons.push('Ausencia de población (-15)'); }
+  if ([v.question, v.mainObjective, v.population, v.mainVariable, v.studyType].some(garbage)) score -= 30;
+  if (/(oncolog|cancer|mama|pembrolizumab)/i.test(merged) && /artritis reumatoide/i.test(low(v.population))) { score -= 25; caps.push({ max: 45, reason: 'Incoherencia grave título-población-variable' }); }
+  if ((text(v.question) && text(v.mainObjective)) && !/(supervivencia|mortalidad|eficacia|efectividad|asociaci|impacto|compar)/i.test((v.question + v.mainObjective).toLowerCase())) { score -= 20; reasons.push('Pregunta y objetivo no relacionados (-20)'); }
+  if (/(oncolog|cancer|mama|pembrolizumab)/i.test(merged) && /hba1c/i.test(low(v.mainVariable))) score -= 20;
+
+  score = Math.max(0, Math.min(100, score));
+  if (caps.length) score = Math.min(score, Math.min(...caps.map((c) => c.max)));
+  latestQualityBreakdown = { breakdown: b, reasons: [...new Set(reasons.concat(caps.map((c) => `${c.reason} (techo ${c.max})`)))].slice(0, 5), score };
+  return score;
 }
 
 function buildAlerts(v){
@@ -214,8 +258,10 @@ function buildDraft(v, readiness){
   const recommendedBibliography = buildRecommendedBibliography(v);
   const improvedHypothesis = improveHypothesis(v);
   const biases = expectedBiasesByDesign(v.studyType);
-  const qualityScore = computeQualityScore(v, readiness);
+  const qualityScore = computeQualityScore(v);
   latestQualityScore = qualityScore;
+  const quality = latestQualityBreakdown || { breakdown: {}, reasons: [] };
+  const qualityLevel = qualityScore <= 39 ? 'No preparado' : qualityScore <= 59 ? 'Idea inicial con problemas importantes' : qualityScore <= 74 ? 'Borrador preliminar mejorable' : qualityScore <= 89 ? 'Protocolo razonablemente sólido para revisión' : 'Protocolo muy sólido para revisión experta';
   return { mode: readiness.shouldGenerateProtocol ? 'protocol' : 'readiness', note: NOTE, checklist: buildChecklist(v), pendingInfo, sections: {
     'Perfil investigador inicial': sanitizeText(v.researchProfile, MAY_NOT_APPLY),
     'Área principal': sanitizeText(v.disciplineArea, MAY_NOT_APPLY),
@@ -248,7 +294,9 @@ function buildDraft(v, readiness){
     'Checklist final para el investigador': 'Revise la checklist operativa del panel de salida antes de exportar el documento.',
     'Ayuda personalizada por perfil': profileGuidance(v),
     'Bibliografía recomendada inicial': recommendedBibliography.map((x, i) => `${i + 1}) ${x}`).join('\n'),
-    'Score de calidad metodológica (0-100)': String(qualityScore)
+    'Score de calidad metodológica (0-100)': `Score de calidad metodológica: ${qualityScore}/100\nClasificación: ${qualityLevel}`,
+    'Desglose del score metodológico': `Pregunta: ${quality.breakdown.question || 0}/15\nObjetivo: ${quality.breakdown.objective || 0}/15\nCoherencia: ${quality.breakdown.coherence || 0}/15\nPoblación: ${quality.breakdown.population || 0}/10\nVariables: ${quality.breakdown.variables || 0}/15\nFuente/factibilidad: ${quality.breakdown.feasibility || 0}/10\nÉtica/regulación: ${quality.breakdown.ethics || 0}/10\nEstadística: ${quality.breakdown.stats || 0}/10`,
+    'Principales motivos que reducen el score': quality.reasons.length ? quality.reasons.map((r) => `- ${r}`).join('\n') : 'Sin penalizaciones críticas detectadas.'
   }};
 }
 
