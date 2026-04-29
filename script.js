@@ -1,7 +1,8 @@
 const form = document.getElementById('projectForm');
 const output = document.getElementById('output');
 const copyButton = document.getElementById('copyButton');
-const downloadPdfButton = document.getElementById('downloadPdfButton');
+const downloadReadinessButton = document.getElementById('downloadReadinessButton');
+const downloadProtocolButton = document.getElementById('downloadProtocolButton');
 const resetButton = document.getElementById('resetButton');
 const previewText = document.getElementById('previewText');
 const progressBar = document.getElementById('progressBar');
@@ -29,7 +30,7 @@ const AUTHOR_CREDIT = 'Herramienta creada por Ramón Morillo. Abril de 2026.';
 
 const ACTION_VERBS = ['evaluar', 'analizar', 'describir', 'determinar', 'comparar', 'estimar', 'identificar', 'validar', 'desarrollar', 'explorar', 'medir', 'estudiar'];
 const value = (id) => document.getElementById(id).value.trim();
-const essentialFields = [
+const criticalFields = [
   { key: 'title', label: 'Título' },
   { key: 'question', label: 'Pregunta de investigación' },
   { key: 'mainObjective', label: 'Objetivo principal' },
@@ -60,24 +61,28 @@ function isEssentialComplete(v, key) {
 }
 
 function evaluateProjectReadiness(v) {
-  const completed = essentialFields.filter((f) => isEssentialComplete(v, f.key));
-  const pending = essentialFields.filter((f) => !isEssentialComplete(v, f.key));
-  const completion = Math.round((completed.length / essentialFields.length) * 100);
-  const missingRatio = pending.length / essentialFields.length;
-  let status = 'Idea parcialmente definida';
-  if (missingRatio > 0.5) status = 'Idea inicial insuficiente';
-  else if (completion >= 90) status = 'Protocolo inicial razonablemente completo';
-  else if (completion >= 70) status = 'Borrador preliminar generable';
-  const recommendation = status === 'Idea inicial insuficiente'
-    ? 'Complete los campos críticos antes de generar el protocolo.'
-    : status === 'Idea parcialmente definida'
-      ? 'Puede generar un borrador, pero debe revisarse con tutor/metodólogo.'
-      : 'Borrador inicial suficientemente completo para revisión.';
-  return { status, completion, completed, pending, shouldGenerateProtocol: missingRatio <= 0.5, recommendation };
+  const hasMedicationSignals = /(pembrolizumab|nivolumab|inmunoterapia|anticuerpos?\s+monoclonales?|fármacos?|medicamentos?|producto\s+sanitario)/i.test(
+    [v.title, v.question, v.mainObjective, v.picoIntervention, v.secondaryVariables, v.medProducts].join(' ')
+  ) || v.medProducts === 'Sí';
+  const completed = criticalFields.filter((f) => isEssentialComplete(v, f.key));
+  const pending = criticalFields.filter((f) => !isEssentialComplete(v, f.key));
+  const completion = Math.round((completed.length / criticalFields.length) * 100);
+  let level = completion >= 90 ? 3 : completion >= 70 ? 2 : completion >= 45 ? 1 : 0;
+  const regulatoryCritical = hasMedicationSignals && (v.interventionPatients === 'No lo sé' || v.informedConsent === 'No lo sé' || v.medProducts === 'No lo sé');
+  if (regulatoryCritical) level = Math.max(0, level - 1);
+  const statuses = ['Idea inicial insuficiente', 'Idea parcialmente definida', 'Borrador preliminar generable', 'Protocolo inicial razonablemente completo'];
+  const status = statuses[level];
+  const recommendation = level <= 1
+    ? 'Completar antes de generar protocolo completo.'
+    : 'Apto para borrador preliminar.';
+  const maturityWarning = regulatoryCritical ? 'Borrador generable, pero con aspectos regulatorios críticos pendientes.' : '';
+  return { status, completion, completed, pending, shouldGenerateProtocol: level >= 1, recommendation, maturityWarning, regulatoryCritical };
 }
 
 function buildAlerts(v){
   const a=[];
+  const mergedText = [v.title, v.question, v.mainObjective, v.picoIntervention, v.studyType, v.mainVariable, v.secondaryVariables].join(' ').toLowerCase();
+  const hasMedicationSignals = /(pembrolizumab|nivolumab|inmunoterapia|anticuerpos?\s+monoclonales?|fármacos?|medicamentos?|producto\s+sanitario)/i.test(mergedText) || v.medProducts === 'Sí';
   if((v.title||'').length>0 && v.title.length<12)a.push('Revisión recomendada: título demasiado corto.');
   if(v.mainObjective&&!ACTION_VERBS.some((x)=>v.mainObjective.toLowerCase().startsWith(x)))a.push('Revisión recomendada: formule el objetivo principal con un verbo de acción (ej.: evaluar, comparar, determinar, estimar).');
   if(!v.mainVariable)a.push('Revisión recomendada: concrete la variable principal y su forma de medición.');
@@ -88,6 +93,13 @@ function buildAlerts(v){
   if(v.personalData==='Sí')a.push('Con datos clínicos/personales: documente seudonimización, autorización del centro y base legal del tratamiento.');
   if(v.medProducts==='Sí')a.push('Si hay medicamentos/productos sanitarios: revise aplicabilidad de RD 957/2020 o RD 1090/2015.');
   if(v.informedConsent==='No lo sé')a.push('Punto crítico: debe aclararse si se requiere consentimiento informado o exención justificada.');
+  if (hasMedicationSignals) a.push('Valorar si el estudio se considera estudio observacional con medicamentos según RD 957/2020 o ensayo clínico según RD 1090/2015. Probable necesidad de CEIm.');
+  if (/(eficacia|seguridad|supervivencia global|progresión|eventos adversos)/i.test(mergedText)) a.push('Defina claramente variable principal, periodo de seguimiento, fuente de datos y plan estadístico.');
+  if (/medir supervivencia global/i.test((v.mainObjective || '').toLowerCase())) a.push('Sugerencia de reformulación: “Evaluar la supervivencia global en pacientes con cáncer de mama tratados con pembrolizumab en el periodo X.”');
+  if (/es más alta que otros/i.test((v.question || '').toLowerCase())) a.push('La pregunta sugiere comparación pero falta comparador definido. Especifique grupo control/comparador.');
+  if (/prospectivo/i.test((v.studyType || '').toLowerCase()) && hasMedicationSignals) a.push('Diseño prospectivo con posible medicamento: valorar intervención, seguimiento, consentimiento y evaluación ética/CEIm.');
+  if ((v.population || '').trim().toLowerCase() === '100 pacientes') a.push('“100 pacientes” no implica justificación muestral. Debe indicarse si es muestra disponible, consecutiva o cálculo formal.');
+  if (/prom/i.test((v.secondaryVariables || '').toLowerCase())) a.push('Para PROM en variables secundarias: indique instrumento validado, versión, idioma, momento de medición y criterio de interpretación.');
   return a;
 }
 
@@ -114,20 +126,34 @@ function buildChecklist(v){
 function buildDraft(v, readiness){
   const pendingInfo = readiness.pending.map((f) => f.label);
   const sample = v.sampleSize ? sanitizeText(v.sampleSize) : 'No se ha definido tamaño muestral. Se recomienda justificarlo según diseño, efecto esperado, precisión, potencia, alfa, pérdidas y factibilidad.';
-  const blocked = 'Este apartado no puede desarrollarse adecuadamente con la información disponible.';
+  const blocked = 'Este apartado requiere ser completado porque condiciona la validez metodológica del estudio. Debe especificarse antes de presentar el proyecto a tutor, unidad metodológica o CEI/CEIm.';
   return { mode: readiness.shouldGenerateProtocol ? 'protocol' : 'readiness', note: NOTE, checklist: buildChecklist(v), pendingInfo, sections: {
     'Título': sanitizeText(v.title),
     'Versión y fecha': `Versión 1.0 · ${new Date().toISOString().slice(0,10)}`,
+    'Investigador principal y equipo': sanitizeText(v.principalInvestigator, MAY_NOT_APPLY),
+    'Promotor, si aplica': MAY_NOT_APPLY,
+    'Justificación y contexto': sanitizeText(v.justification, blocked),
     'Pregunta de investigación': sanitizeText(v.question, blocked),
+    'Hipótesis, si procede': MAY_NOT_APPLY,
     'Objetivo principal': sanitizeText(v.mainObjective, blocked),
+    'Objetivos secundarios': sanitizeText(v.secondaryObjectives, MAY_NOT_APPLY),
     'Diseño del estudio': sanitizeText(v.studyType, blocked),
     'Ámbito y población': `${sanitizeText(v.center, MAY_NOT_APPLY)}. Población: ${sanitizeText(v.population, blocked)}.`,
+    'Criterios de inclusión': sanitizeText(v.inclusionCriteria, blocked),
+    'Criterios de exclusión': sanitizeText(v.exclusionCriteria, blocked),
     'Variables': `Principal: ${sanitizeText(v.mainVariable, blocked)}. Secundarias: ${sanitizeText(v.secondaryVariables, MAY_NOT_APPLY)}.`,
     'Fuente de datos': sanitizeText(v.dataSource, blocked),
     'Tamaño muestral': sample,
+    'Análisis estadístico orientativo': blocked,
     'Gestión de datos y confidencialidad': v.personalData==='Sí'?'Aplicar minimización, control de accesos, seudonimización y base legal del tratamiento con autorización institucional.':MAY_NOT_APPLY,
     'Consideraciones éticas': sanitizeText(v.informedConsent, blocked),
+    'Consentimiento informado o exención': sanitizeText(v.informedConsent, blocked),
+    'Riesgos y beneficios': blocked,
+    'Limitaciones': blocked,
     'Plan de trabajo': sanitizeText(v.timeline, MAY_NOT_APPLY)
+    ,'Difusión de resultados': blocked,
+    'Documentación/anexos recomendados': 'Protocolo versionado, hoja de información al participante, consentimiento/exención, autorización de centro, plan de protección de datos y anexos técnicos aplicables.',
+    'Checklist final para el investigador': 'Revise la checklist operativa del panel de salida antes de exportar el documento.'
   }};
 }
 
@@ -153,10 +179,11 @@ function updateProgress(){const v=collectValues(); const filled=Object.values(v)
   if(track) track.setAttribute('aria-valuenow', String(percent));}
 
 form.addEventListener('input', ()=>{const v=collectValues(); const readiness=evaluateProjectReadiness(v); latestReadiness=readiness; renderAlerts(buildAlerts(v)); renderMaturityCard(readiness); updateProgress();});
-form.addEventListener('submit', (e)=>{e.preventDefault(); const v=collectValues(); const readiness=evaluateProjectReadiness(v); const d=buildDraft(v, readiness); const t=formatDraft(d, readiness); latestValues=v; latestDraftData=d; latestDraftText=t; latestReadiness=readiness; output.querySelector('.status-message').textContent = readiness.shouldGenerateProtocol ? 'Borrador generado correctamente.' : 'Madurez insuficiente: se generará un informe de madurez.'; previewText.textContent=t; updateChecklist(d.checklist); renderMaturityCard(readiness); downloadPdfButton.disabled=false;});
+form.addEventListener('submit', (e)=>{e.preventDefault(); const v=collectValues(); const readiness=evaluateProjectReadiness(v); const d=buildDraft(v, readiness); const t=formatDraft(d, readiness); latestValues=v; latestDraftData=d; latestDraftText=t; latestReadiness=readiness; output.querySelector('.status-message').textContent = readiness.shouldGenerateProtocol ? 'Borrador generado correctamente.' : 'Madurez insuficiente: se generará un informe de madurez.'; previewText.textContent=t; updateChecklist(d.checklist); renderMaturityCard(readiness); downloadReadinessButton.disabled=false; downloadProtocolButton.disabled=false;});
 copyButton.addEventListener('click', async ()=>{if(!latestDraftText)return; await navigator.clipboard.writeText(latestDraftText);});
-downloadPdfButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolPdf) window.generateProtocolPdf(latestValues, latestDraftData, latestReadiness);});
-resetButton.addEventListener('click', ()=>{form.reset(); latestValues=null; latestDraftData=null; latestDraftText=''; latestReadiness=null; previewText.textContent='Aún no hay contenido generado.'; output.querySelector('.status-message').textContent='Completa el formulario y pulsa “Generar borrador”.'; validationAlerts.innerHTML=''; downloadPdfButton.disabled=true; maturityCard.hidden=true; updateChecklist(['Genera un borrador para ver la checklist personalizada.']); updateProgress();});
+downloadReadinessButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolPdf) window.generateProtocolPdf(latestValues, latestDraftData, latestReadiness, 'readiness');});
+downloadProtocolButton.addEventListener('click', ()=>{ if(latestValues&&latestDraftData&&latestReadiness&&window.generateProtocolPdf){ if(!latestReadiness.shouldGenerateProtocol) alert('El protocolo se generará con apartados pendientes y no debería presentarse todavía a evaluación.'); window.generateProtocolPdf(latestValues, latestDraftData, latestReadiness, 'protocol'); }});
+resetButton.addEventListener('click', ()=>{form.reset(); latestValues=null; latestDraftData=null; latestDraftText=''; latestReadiness=null; previewText.textContent='Aún no hay contenido generado.'; output.querySelector('.status-message').textContent='Completa el formulario y pulsa “Generar borrador”.'; validationAlerts.innerHTML=''; downloadReadinessButton.disabled=true; downloadProtocolButton.disabled=true; maturityCard.hidden=true; updateChecklist(['Genera un borrador para ver la checklist personalizada.']); updateProgress();});
 
 document.querySelectorAll('.tab-btn').forEach((btn)=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn,.tab-panel').forEach((el)=>el.classList.remove('active')); btn.classList.add('active'); document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');}));
 updateProgress();
