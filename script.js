@@ -53,7 +53,18 @@ const sanitizeText = (text, fallback = PENDING) => {
   return cleaned;
 };
 
-function collectValues() { return { templateSelector:value('templateSelector'), projectType:value('projectType'), area:value('area'), title:value('title'), question:value('question'), hypothesis:value('hypothesis'), picoPopulation:value('picoPopulation'), picoIntervention:value('picoIntervention'), picoComparator:value('picoComparator'), picoOutcome:value('picoOutcome'), justification:value('justification'), mainObjective:value('mainObjective'), secondaryObjectives:value('secondaryObjectives'), studyType:value('studyType'), population:value('population'), inclusionCriteria:value('inclusionCriteria'), exclusionCriteria:value('exclusionCriteria'), mainVariable:value('mainVariable'), secondaryVariables:value('secondaryVariables'), dataSource:value('dataSource'), personalData:value('personalData'), vulnerable:value('vulnerable'), biologicalSamples:value('biologicalSamples'), interventionPatients:value('interventionPatients'), medProducts:value('medProducts'), informedConsent:value('informedConsent'), sampleSize:value('sampleSize'), timeline:value('timeline'), center:value('center'), principalInvestigator:value('principalInvestigator')}; }
+function collectValues() { return { templateSelector:value('templateSelector'), researchProfile:value('researchProfile'), disciplineArea:value('disciplineArea'), projectType:value('projectType'), area:value('area'), title:value('title'), question:value('question'), hypothesis:value('hypothesis'), picoPopulation:value('picoPopulation'), picoIntervention:value('picoIntervention'), picoComparator:value('picoComparator'), picoOutcome:value('picoOutcome'), justification:value('justification'), mainObjective:value('mainObjective'), secondaryObjectives:value('secondaryObjectives'), studyType:value('studyType'), population:value('population'), inclusionCriteria:value('inclusionCriteria'), exclusionCriteria:value('exclusionCriteria'), mainVariable:value('mainVariable'), secondaryVariables:value('secondaryVariables'), dataSource:value('dataSource'), personalData:value('personalData'), vulnerable:value('vulnerable'), biologicalSamples:value('biologicalSamples'), interventionPatients:value('interventionPatients'), medProducts:value('medProducts'), informedConsent:value('informedConsent'), sampleSize:value('sampleSize'), timeline:value('timeline'), center:value('center'), principalInvestigator:value('principalInvestigator')}; }
+
+function profileGuidance(v) {
+  const profile = (v.researchProfile || '').toLowerCase();
+  if (profile === 'tfg') return 'En TFG: priorice una pregunta acotada, diseño viable y cronograma ajustado al curso académico.';
+  if (profile === 'tfm') return 'En TFM: refuerce marco teórico, plan analítico y justificación metodológica con mayor profundidad.';
+  if (profile === 'doctorado') return 'En doctorado: explicite originalidad, hipótesis robusta y plan de publicación por objetivos.';
+  if (profile === 'residente sanitario') return 'Como residente sanitario: coordine tutor clínico, acceso a datos y tramitación ética temprana.';
+  if (profile === 'profesional clínico') return 'Como profesional clínico: incorpore factibilidad asistencial, carga de trabajo y aplicabilidad clínica.';
+  if (profile === 'investigador novel') return 'Como investigador novel: empiece por un diseño simple, variable principal clara y tutoría metodológica.';
+  return 'Seleccione perfil para activar recomendaciones específicas de etapa investigadora.';
+}
 
 function isEssentialComplete(v, key) {
   const raw = (v[key] || '').trim();
@@ -184,6 +195,8 @@ function renderMaturityCard(readiness) {
 
 function buildChecklist(v){
   const c=['Revisar coherencia entre pregunta, objetivo, diseño y variables.'];
+  c.push(profileGuidance(v));
+  if (v.disciplineArea) c.push(`Área seleccionada: ${v.disciplineArea}. Verificar terminología y estándares metodológicos propios del área.`);
   c.push('Confirmar si el estudio utiliza datos personales o clínicos y definir las garantías de protección de datos.');
   c.push('Confirmar si participan personas vulnerables y justificar medidas adicionales de protección.');
   c.push('Confirmar si se utilizarán muestras biológicas y revisar normativa aplicable.');
@@ -204,6 +217,8 @@ function buildDraft(v, readiness){
   const qualityScore = computeQualityScore(v, readiness);
   latestQualityScore = qualityScore;
   return { mode: readiness.shouldGenerateProtocol ? 'protocol' : 'readiness', note: NOTE, checklist: buildChecklist(v), pendingInfo, sections: {
+    'Perfil investigador inicial': sanitizeText(v.researchProfile, MAY_NOT_APPLY),
+    'Área principal': sanitizeText(v.disciplineArea, MAY_NOT_APPLY),
     'Título': sanitizeText(v.title),
     'Versión y fecha': `Versión 1.0 · ${new Date().toISOString().slice(0,10)}`,
     'Investigador principal y equipo': sanitizeText(v.principalInvestigator, MAY_NOT_APPLY),
@@ -231,6 +246,7 @@ function buildDraft(v, readiness){
     ,'Difusión de resultados': blocked,
     'Documentación/anexos recomendados': 'Protocolo versionado, hoja de información al participante, consentimiento/exención, autorización de centro, plan de protección de datos y anexos técnicos aplicables.',
     'Checklist final para el investigador': 'Revise la checklist operativa del panel de salida antes de exportar el documento.',
+    'Ayuda personalizada por perfil': profileGuidance(v),
     'Bibliografía recomendada inicial': recommendedBibliography.map((x, i) => `${i + 1}) ${x}`).join('\n'),
     'Score de calidad metodológica (0-100)': String(qualityScore)
   }};
@@ -272,7 +288,7 @@ document.querySelectorAll('.tab-btn').forEach((btn)=>btn.addEventListener('click
 updateProgress();
 
 
-const templates={TFG:{projectType:'TFG'},'cohorte':{studyType:'Cohorte'},'casos-control':{studyType:'Casos y controles'},'ensayo':{studyType:'Ensayo clínico'},'revision':{studyType:'Revisión sistemática'},'farmacia-hospitalaria':{area:'Farmacia Hospitalaria'},'oncologia':{area:'Oncología'},'prom':{mainVariable:'PROM validado'}};
+const templates={TFG:{researchProfile:'TFG',projectType:'TFG'},'cohorte':{studyType:'Cohorte'},'casos-control':{studyType:'Casos y controles'},'ensayo':{studyType:'Ensayo clínico'},'revision':{studyType:'Revisión sistemática'},'farmacia-hospitalaria':{disciplineArea:'Salud',area:'Farmacia Hospitalaria'},'oncologia':{disciplineArea:'Salud',area:'Oncología'},'prom':{disciplineArea:'Salud',mainVariable:'PROM validado'}};
 document.getElementById('templateSelector')?.addEventListener('change',(e)=>{const t=templates[e.target.value]||{};Object.entries(t).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});updateProgress();});
 
 const zAlpha={0.05:1.96,0.01:2.58};const zPower={0.8:0.84,0.9:1.28};
