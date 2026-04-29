@@ -7,20 +7,20 @@
       name="description"
       content="AyudaInvestigacion: asistente gratuito para diseñar proyectos de investigación en local y sin APIs externas."
     />
-    <title>AyudaInvestigacion · Protocolo + CEI/SICEIA</title>
+    <title>AyudaInvestigacion · Asistente para jóvenes investigadores</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="hero container">
       <h1>AyudaInvestigacion</h1>
-      <p class="subtitle">Asistente gratuito para diseñar protocolos de investigación</p>
+      <p class="subtitle">Asistente para jóvenes investigadores</p>
       <p class="notice" role="note">Herramienta orientativa. No sustituye revisión metodológica, ética, legal ni evaluación CEI.</p>
     </header>
 
     <main class="container">
       <nav class="tabs" aria-label="Secciones principales">
         <button class="tab-btn active" data-tab="generator">Generador de protocolo</button>
-        <button class="tab-btn" data-tab="cei">Ayuda CEI / SICEIA</button>
+        <button class="tab-btn" data-tab="cei">Módulos avanzados sanitarios (opcional)</button>
         <button class="tab-btn" data-tab="checklist">Checklist</button>
         <button class="tab-btn" data-tab="about">Acerca de</button>
       </nav>
@@ -37,8 +37,10 @@
               <div id="validationAlerts" class="soft-alerts" aria-live="polite"></div>
               <ol class="steps">
                 <li class="field"><label for="templateSelector">Plantilla rápida</label><select id="templateSelector"><option value="">Seleccionar plantilla...</option><option value="TFG">TFG</option><option value="cohorte">Cohorte</option><option value="casos-control">Casos-control</option><option value="ensayo">Ensayo</option><option value="revision">Revisión</option><option value="farmacia-hospitalaria">Farmacia hospitalaria</option><option value="oncologia">Oncología</option><option value="prom">Validación PROM</option></select></li>
+                <li class="field"><label for="researchProfile">Perfil inicial</label><select id="researchProfile"><option value=""></option><option>TFG</option><option>TFM</option><option>Doctorado</option><option>Residente sanitario</option><option>Profesional clínico</option><option>Investigador novel</option></select></li>
                 <li class="field"><label for="projectType">Tipo de proyecto</label><select id="projectType"><option value=""></option><option>TFG</option><option>TFM</option><option>Tesis</option><option>Comunicación</option><option>Estudio observacional</option><option>Ensayo</option><option>Revisión</option><option>Proyecto CEI</option><option>Otro</option></select></li>
-                <li class="field"><label for="area">Área</label><input id="area" type="text" /></li>
+                <li class="field"><label for="disciplineArea">Área principal</label><select id="disciplineArea"><option value=""></option><option>Salud</option><option>Ciencias sociales</option><option>Educación</option><option>Ingeniería</option><option>Básica/laboratorio</option><option>Multidisciplinar</option></select></li>
+                <li class="field"><label for="area">Área específica (opcional)</label><input id="area" type="text" /></li>
                 <li class="field"><label for="title">Título provisional</label><input id="title" type="text" /></li>
                 <li class="field"><label for="question">Pregunta de investigación</label><textarea id="question" rows="2"></textarea></li>
                 <li class="field"><label for="hypothesis">Hipótesis (ayuda: relación esperada y dirección del efecto)</label><textarea id="hypothesis" rows="2" placeholder="Ej.: En pacientes X, la intervención Y reducirá Z frente a comparador C."></textarea></li>
@@ -108,12 +110,12 @@
       </section>
 
       <section id="tab-cei" class="tab-panel card cei-panel">
-        <h2>Ayuda CEI / SICEIA</h2>
+        <h2>Módulos avanzados sanitarios (opcional)</h2>
         <p><strong>¿Qué es un CEI?</strong> Un Comité de Ética de la Investigación (CEI/CEIm) evalúa la validez metodológica, el balance beneficio-riesgo, la protección de participantes y el cumplimiento legal de los estudios.</p>
       </section>
       <section id="tab-checklist" class="tab-panel card"><h2>Checklist inteligente</h2><ul id="dynamicChecklist"><li>Genera un borrador para ver la checklist personalizada.</li></ul></section>
       <section id="tab-about" class="tab-panel card"><h2>Acerca de AyudaInvestigacion</h2>
-        <p>AyudaInvestigacion es una herramienta gratuita de apoyo al diseño inicial de proyectos de investigación.</p>
+        <p>AyudaInvestigacion es una herramienta gratuita y general para diseñar proyectos de investigación en fases iniciales.</p>
         <p>Autoría: Ramón Morillo (abril de 2026). Se muestra de forma discreta en pie de página y en el PDF exportado.</p>
       </section>
     </main>
