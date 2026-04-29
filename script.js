@@ -352,6 +352,11 @@ downloadProtocolButton.addEventListener('click', ()=>{ if(latestValues&&latestDr
 resetButton.addEventListener('click', ()=>{form.reset(); latestValues=null; latestDraftData=null; latestDraftText=''; latestReadiness=null; previewText.textContent='Aún no hay contenido generado.'; output.querySelector('.status-message').textContent='Completa el formulario y pulsa “Generar borrador”.'; validationAlerts.innerHTML=''; downloadReadinessButton.disabled=true; downloadProtocolButton.disabled=true; if(downloadDocxButton) downloadDocxButton.disabled=true; maturityCard.hidden=true; updateChecklist(['Genera un borrador para ver la checklist personalizada.']); updateProgress();});
 
 document.querySelectorAll('.tab-btn').forEach((btn)=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn,.tab-panel').forEach((el)=>el.classList.remove('active')); btn.classList.add('active'); document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');}));
+const aboutModal = document.getElementById('aboutModal');
+document.getElementById('openAboutModal')?.addEventListener('click', ()=>{ if(aboutModal){ aboutModal.classList.add('open'); aboutModal.setAttribute('aria-hidden','false'); }});
+document.getElementById('closeAboutModal')?.addEventListener('click', ()=>{ if(aboutModal){ aboutModal.classList.remove('open'); aboutModal.setAttribute('aria-hidden','true'); }});
+aboutModal?.addEventListener('click', (event)=>{ if(event.target===aboutModal){ aboutModal.classList.remove('open'); aboutModal.setAttribute('aria-hidden','true'); }});
+document.addEventListener('keydown', (event)=>{ if(event.key==='Escape' && aboutModal?.classList.contains('open')){ aboutModal.classList.remove('open'); aboutModal.setAttribute('aria-hidden','true'); }});
 updateProgress();
 
 
