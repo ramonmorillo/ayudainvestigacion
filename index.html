@@ -30,29 +30,31 @@
           <section class="card form-card" aria-labelledby="wizard-title">
             <h2 id="wizard-title">Formulario guiado</h2>
             <div class="progress-wrap" aria-live="polite">
-              <div class="progress-meta"><span id="progressText">Paso 1 de 25</span><span id="progressPercent">4%</span></div>
-              <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4"><div id="progressBar" class="progress-bar"></div></div>
+              <div class="progress-meta"><span id="progressText">Paso 0 de 27</span><span id="progressPercent">0%</span></div>
+              <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressBar" class="progress-bar"></div></div>
             </div>
             <form id="projectForm" novalidate>
               <div id="validationAlerts" class="soft-alerts" aria-live="polite"></div>
               <ol class="steps">
+                <li class="field"><label for="templateSelector">Plantilla rápida</label><select id="templateSelector"><option value="">Seleccionar plantilla...</option><option value="TFG">TFG</option><option value="cohorte">Cohorte</option><option value="casos-control">Casos-control</option><option value="ensayo">Ensayo</option><option value="revision">Revisión</option><option value="farmacia-hospitalaria">Farmacia hospitalaria</option><option value="oncologia">Oncología</option><option value="prom">Validación PROM</option></select></li>
                 <li class="field"><label for="projectType">Tipo de proyecto</label><select id="projectType"><option value=""></option><option>TFG</option><option>TFM</option><option>Tesis</option><option>Comunicación</option><option>Estudio observacional</option><option>Ensayo</option><option>Revisión</option><option>Proyecto CEI</option><option>Otro</option></select></li>
                 <li class="field"><label for="area">Área</label><input id="area" type="text" /></li>
                 <li class="field"><label for="title">Título provisional</label><input id="title" type="text" /></li>
                 <li class="field"><label for="question">Pregunta de investigación</label><textarea id="question" rows="2"></textarea></li>
+                <li class="field"><label for="hypothesis">Hipótesis (ayuda: relación esperada y dirección del efecto)</label><textarea id="hypothesis" rows="2" placeholder="Ej.: En pacientes X, la intervención Y reducirá Z frente a comparador C."></textarea></li>
                 <li class="field"><label for="picoPopulation">PICO/PECO: Población</label><input id="picoPopulation" type="text" /></li>
                 <li class="field"><label for="picoIntervention">PICO/PECO: Intervención/exposición</label><input id="picoIntervention" type="text" /></li>
                 <li class="field"><label for="picoComparator">PICO/PECO: Comparador</label><input id="picoComparator" type="text" /></li>
                 <li class="field"><label for="picoOutcome">PICO/PECO: Outcome/resultado</label><input id="picoOutcome" type="text" /></li>
                 <li class="field"><label for="justification">Justificación breve</label><textarea id="justification" rows="2"></textarea></li>
-                <li class="field"><label for="mainObjective">Objetivo principal</label><textarea id="mainObjective" rows="2"></textarea></li>
-                <li class="field"><label for="secondaryObjectives">Objetivos secundarios</label><textarea id="secondaryObjectives" rows="2"></textarea></li>
+                <li class="field"><label for="mainObjective">Objetivo principal <span class="hint">(Ej.: Evaluar..., Comparar..., Estimar...)</span></label><textarea id="mainObjective" rows="2"></textarea></li>
+                <li class="field"><label for="secondaryObjectives">Objetivos secundarios</label><textarea id="secondaryObjectives" rows="2" placeholder="Ej.: Describir EA; analizar subgrupos; estimar adherencia."></textarea></li>
                 <li class="field"><label for="studyType">Diseño deseado</label><input id="studyType" type="text" placeholder="Ej. Cohorte, casos y controles, ensayo..."/></li>
                 <li class="field"><label for="population">Población/muestra</label><input id="population" type="text" /></li>
                 <li class="field"><label for="inclusionCriteria">Criterios de inclusión</label><textarea id="inclusionCriteria" rows="2"></textarea></li>
                 <li class="field"><label for="exclusionCriteria">Criterios de exclusión</label><textarea id="exclusionCriteria" rows="2"></textarea></li>
-                <li class="field"><label for="mainVariable">Variable principal</label><input id="mainVariable" type="text" /></li>
-                <li class="field"><label for="secondaryVariables">Variables secundarias</label><textarea id="secondaryVariables" rows="2"></textarea></li>
+                <li class="field"><label for="mainVariable">Variable principal <span class="hint">(definición operacional + unidad + momento)</span></label><input id="mainVariable" type="text" /></li>
+                <li class="field"><label for="secondaryVariables">Variables secundarias</label><textarea id="secondaryVariables" rows="2" placeholder="Ej.: estancia (días), eventos adversos (CTCAE), calidad de vida (EORTC QLQ-C30)"></textarea></li>
                 <li class="field"><label for="dataSource">Fuente de datos</label><input id="dataSource" type="text" /></li>
                 <li class="field"><label for="sampleSize">Tamaño muestral (si lo sabe)</label><input id="sampleSize" type="text" /></li>
                 <li class="field"><label for="timeline">Duración/calendario previsto</label><input id="timeline" type="text" /></li>
@@ -66,6 +68,17 @@
                 <div class="field"><label for="interventionPatients">Intervención sobre pacientes</label><select id="interventionPatients"><option>No lo sé</option><option>Sí</option><option>No</option></select></div>
                 <div class="field"><label for="medProducts">Uso de medicamentos/productos sanitarios</label><select id="medProducts"><option>No lo sé</option><option>Sí</option><option>No</option></select></div>
                 <div class="field"><label for="informedConsent">Necesidad probable de consentimiento informado</label><select id="informedConsent"><option>No lo sé</option><option>Sí</option><option>No</option></select></div>
+              </div>
+              <div class="sample-size-box">
+                <h3>Calculadora básica tamaño muestral</h3>
+                <div class="grid-ethics">
+                  <div class="field"><label for="calcType">Tipo de estudio</label><select id="calcType"><option value="medias">Comparación de medias</option><option value="proporciones">Comparación de proporciones</option><option value="prevalencia">Estimación de prevalencia</option></select></div>
+                  <div class="field"><label for="calcAlpha">Alfa (2 colas)</label><input id="calcAlpha" type="number" step="0.001" value="0.05" /></div>
+                  <div class="field"><label for="calcPower">Potencia (1-β)</label><input id="calcPower" type="number" step="0.01" value="0.8" /></div>
+                  <div class="field"><label for="calcDropout">Pérdidas esperadas (%)</label><input id="calcDropout" type="number" step="1" value="10" /></div>
+                  <div class="field"><label for="calcEffect">Diferencia clínica mínima / precisión</label><input id="calcEffect" type="number" step="0.001" value="0.5" /></div>
+                </div>
+                <div class="actions"><button type="button" class="btn" id="sampleCalcButton">Calcular muestra</button><span id="sampleCalcResult" class="helper-text"></span></div>
               </div>
               <div class="actions"><button type="submit" class="btn primary">Generar borrador</button><button type="button" class="btn" id="resetButton">Reiniciar formulario</button></div>
             </form>
@@ -96,37 +109,17 @@
       <section id="tab-cei" class="tab-panel card cei-panel">
         <h2>Ayuda CEI / SICEIA</h2>
         <p><strong>¿Qué es un CEI?</strong> Un Comité de Ética de la Investigación (CEI/CEIm) evalúa la validez metodológica, el balance beneficio-riesgo, la protección de participantes y el cumplimiento legal de los estudios.</p>
-        <h3>Documentación habitual</h3>
-        <ul>
-          <li>Protocolo completo y versión/fecha.</li>
-          <li>Hoja de información al participante y consentimiento informado (o solicitud de exención).</li>
-          <li>Memoria económica, compromiso del investigador principal y autorización del centro.</li>
-          <li>Plan de protección de datos y anexos técnicos aplicables.</li>
-        </ul>
-        <h3>Normativa de referencia</h3>
-        <ul>
-          <li>Ley 14/2007 de Investigación Biomédica.</li>
-          <li>RGPD (UE 2016/679) y LOPDGDD 3/2018.</li>
-          <li>RD 1090/2015 y RD 957/2020 cuando aplique a ensayos/EPA.</li>
-        </ul>
-        <p class="notice">En Andalucía, la tramitación de proyectos se realiza mediante SICEIA cuando corresponda, con certificado electrónico y AutoFirma digital.</p>
-        <p><a href="https://www.bioetica-andalucia.es/3-comites-de-etica/3-3-comites-etica-investigacion-ceis/" target="_blank" rel="noopener noreferrer">Bioética Andalucía · CEIs</a></p>
-        <p><a href="https://fpysz239.csalud.junta-andalucia.es/salud/siceia/" target="_blank" rel="noopener noreferrer">SICEIA · Junta de Andalucía</a></p>
       </section>
-
       <section id="tab-checklist" class="tab-panel card"><h2>Checklist inteligente</h2><ul id="dynamicChecklist"><li>Genera un borrador para ver la checklist personalizada.</li></ul></section>
       <section id="tab-about" class="tab-panel card"><h2>Acerca de AyudaInvestigacion</h2>
-        <p>AyudaInvestigacion es una herramienta gratuita de apoyo al diseño inicial de proyectos de investigación, especialmente orientada a jóvenes investigadores, estudiantes, residentes y profesionales sanitarios que necesitan transformar una idea preliminar en un borrador estructurado de protocolo.</p>
-        <p>La herramienta guía al usuario mediante preguntas progresivas y genera un documento orientativo que puede servir como punto de partida para la revisión con un tutor, investigador principal, unidad metodológica o comité de ética.</p>
-        <p>Esta aplicación no sustituye la revisión metodológica, ética, legal ni regulatoria correspondiente. El protocolo generado debe ser revisado, completado y adaptado por el investigador principal según el tipo de estudio, el centro, la normativa vigente y los requisitos del CEI correspondiente.</p>
-        <p>La herramienta está diseñada como una app estática, sin backend y sin APIs de pago, preparada para funcionar en GitHub Pages. No debe introducirse información identificativa real de pacientes.</p>
-        <p>AyudaInvestigacion es una herramienta gratuita de apoyo al diseño inicial de proyectos de investigación, especialmente orientada a jóvenes investigadores, estudiantes, residentes y profesionales sanitarios. Ha sido creada por Ramón Morillo en abril de 2026 como recurso orientativo para transformar una idea inicial en un borrador estructurado de protocolo.</p>
-        <p>La herramienta no sustituye la revisión metodológica, ética, legal ni regulatoria correspondiente. Todo protocolo generado debe ser revisado, completado y adaptado por el investigador principal, tutor, unidad metodológica o comité de ética correspondiente.</p></section>
+        <p>AyudaInvestigacion es una herramienta gratuita de apoyo al diseño inicial de proyectos de investigación.</p>
+        <p>Autoría: Ramón Morillo (abril de 2026). Se muestra de forma discreta en pie de página y en el PDF exportado.</p>
+      </section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="assets/pdf-generator.js"></script>
     <script src="script.js"></script>
-    <footer class="container footer-credit">Herramienta creada por Ramón Morillo. Abril de 2026.</footer>
+    <footer class="container footer-credit">AyudaInvestigacion · Autoría: Ramón Morillo · Abril 2026</footer>
   </body>
 </html>
