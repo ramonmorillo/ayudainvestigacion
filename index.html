@@ -74,7 +74,17 @@
           <section class="card output-card">
             <h2>Borrador generado</h2>
             <div id="output" class="output-panel"><p class="status-message">Completa el formulario y pulsa “Generar borrador”.</p><pre id="previewText" class="preview-text">Aún no hay contenido generado.</pre></div>
-            <div class="actions"><button type="button" class="btn" id="copyButton">Copiar resumen</button><button type="button" class="btn" id="downloadPdfButton" disabled>Descargar PDF</button></div>
+            <div id="maturityCard" class="maturity-card" hidden>
+              <h3>Nivel de madurez del proyecto</h3>
+              <p><strong>Estado global:</strong> <span id="maturityStatus">-</span></p>
+              <p><strong>Porcentaje de completitud real:</strong> <span id="maturityCompletion">0%</span></p>
+              <div class="maturity-columns">
+                <div><h4>Campos esenciales completos</h4><ul id="maturityCompleted"><li>Ninguno</li></ul></div>
+                <div><h4>Campos esenciales pendientes</h4><ul id="maturityPending"><li>Ninguno</li></ul></div>
+              </div>
+              <p class="notice-inline"><strong>Recomendación:</strong> <span id="maturityRecommendation">Complete los campos críticos antes de generar el protocolo.</span></p>
+            </div>
+            <div class="actions"><button type="button" class="btn" id="copyButton">Copiar resumen</button><button type="button" class="btn" id="downloadPdfButton" disabled>Descargar PDF</button></div><p class="helper-text">La herramienta generará un informe de madurez o un protocolo preliminar según la información disponible.</p>
           </section>
         </div>
       </section>
@@ -106,11 +116,13 @@
         <p>La herramienta guía al usuario mediante preguntas progresivas y genera un documento orientativo que puede servir como punto de partida para la revisión con un tutor, investigador principal, unidad metodológica o comité de ética.</p>
         <p>Esta aplicación no sustituye la revisión metodológica, ética, legal ni regulatoria correspondiente. El protocolo generado debe ser revisado, completado y adaptado por el investigador principal según el tipo de estudio, el centro, la normativa vigente y los requisitos del CEI correspondiente.</p>
         <p>La herramienta está diseñada como una app estática, sin backend y sin APIs de pago, preparada para funcionar en GitHub Pages. No debe introducirse información identificativa real de pacientes.</p>
-        <p>Herramienta creada en abril de 2026.</p></section>
+        <p>AyudaInvestigacion es una herramienta gratuita de apoyo al diseño inicial de proyectos de investigación, especialmente orientada a jóvenes investigadores, estudiantes, residentes y profesionales sanitarios. Ha sido creada por Ramón Morillo en abril de 2026 como recurso orientativo para transformar una idea inicial en un borrador estructurado de protocolo.</p>
+        <p>La herramienta no sustituye la revisión metodológica, ética, legal ni regulatoria correspondiente. Todo protocolo generado debe ser revisado, completado y adaptado por el investigador principal, tutor, unidad metodológica o comité de ética correspondiente.</p></section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="assets/pdf-generator.js"></script>
     <script src="script.js"></script>
+    <footer class="container footer-credit">Herramienta creada por Ramón Morillo. Abril de 2026.</footer>
   </body>
 </html>

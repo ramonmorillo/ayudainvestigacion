@@ -15,3 +15,10 @@
 .soft-alerts p{margin:.2rem 0;color:#7a4a00}
 .cei-panel h3{margin-top:1rem;margin-bottom:.4rem}
 .cei-panel ul{margin:.2rem 0 .8rem 1.2rem}
+
+.maturity-card{margin:.9rem 0;padding:.8rem;border:1px solid #c7d8f8;background:#f3f7ff;border-radius:10px}
+.maturity-columns{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.maturity-card h4{margin:.4rem 0}
+.helper-text{margin:.2rem 0 0;color:#5d6b82;font-size:.9rem}
+.notice-inline{background:#fff;border-radius:8px;padding:.45rem .6rem;border:1px solid #e4ebfb}
+.footer-credit{padding:1rem 0 2rem;color:#475569;font-weight:600}
