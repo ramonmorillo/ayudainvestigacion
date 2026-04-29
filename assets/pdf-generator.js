@@ -1,109 +1,24 @@
 (function () {
-  const NOTE_TEXT = 'Este documento es un borrador orientativo generado como ayuda para el diseño inicial de un proyecto de investigación. No todos los apartados son aplicables a todos los tipos de estudios. El formato debe ser adaptado por el investigador principal según la naturaleza del proyecto, los requisitos del centro, el comité de ética, la normativa vigente y la metodología específica correspondiente. El investigador principal es el responsable último de revisar, completar, justificar y validar el contenido antes de su utilización.';
-
-  function placeholder(text) {
-    return text && text.trim() ? text.trim() : '[Pendiente de completar por el investigador principal]';
-  }
-
-  function splitText(doc, text, maxWidth) {
-    return doc.splitTextToSize(text, maxWidth);
-  }
-
+  const NOTE_TEXT = 'Este documento es un borrador orientativo generado como ayuda para el diseño inicial de un proyecto de investigación. No sustituye la revisión metodológica, ética, legal ni la evaluación por el CEI correspondiente. El investigador principal es responsable de revisar, completar, justificar y adaptar el protocolo a la normativa vigente, al centro y al tipo de investigación.';
   window.generateProtocolPdf = function generateProtocolPdf(values, draftData) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    const pageWidth = 210;
-    const pageHeight = 297;
-    const margin = 15;
-    const contentWidth = pageWidth - margin * 2;
-    let y = 20;
-
-    const addHeaderFooter = () => {
-      const pageCount = doc.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i += 1) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(90);
-        doc.text('AyudaInvestigacion – Borrador orientativo', margin, pageHeight - 8);
-        doc.text(`Página ${i}/${pageCount}`, pageWidth - margin, pageHeight - 8, { align: 'right' });
-      }
-    };
-
-    const ensureSpace = (needed = 8) => {
-      if (y + needed > pageHeight - 20) {
-        doc.addPage();
-        y = 20;
-      }
-    };
-
-    const addParagraph = (text, fontSize = 11, gapAfter = 5, indent = 0) => {
-      doc.setFontSize(fontSize);
-      doc.setTextColor(25);
-      const lines = splitText(doc, text, contentWidth - indent);
-      const lineHeight = fontSize * 0.38 + 1.5;
-      ensureSpace(lines.length * lineHeight + gapAfter);
-      doc.text(lines, margin + indent, y);
-      y += lines.length * lineHeight + gapAfter;
-    };
-
-    const addSection = (title, body) => {
-      ensureSpace(12);
-      doc.setFontSize(13);
-      doc.setFont(undefined, 'bold');
-      doc.text(title, margin, y);
-      y += 6;
-      doc.setFont(undefined, 'normal');
-      addParagraph(body || 'Este apartado debe adaptarse según el tipo de estudio.');
-    };
-
-    const today = new Date();
-    const dateStr = today.toISOString().slice(0, 10);
-
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(18);
-    doc.text('PROTOCOLO DE INVESTIGACIÓN (BORRADOR)', margin, y);
-    y += 10;
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
-    addParagraph(`Título del estudio: ${placeholder(draftData.title)}`);
-    addParagraph(`Fecha y versión del protocolo: ${dateStr} · Versión preliminar 0.1`);
-    addParagraph('Investigador principal: [Pendiente de completar por el investigador principal]');
-    addParagraph('Promotor (si aplica): Este apartado debe adaptarse según el tipo de estudio.');
-    addParagraph('Responsables del estudio: [Pendiente de completar por el investigador principal]');
-
-    ensureSpace(30);
-    doc.setDrawColor(210);
-    doc.setFillColor(255, 248, 225);
-    const boxHeight = 44;
-    doc.roundedRect(margin, y, contentWidth, boxHeight, 2, 2, 'FD');
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(11);
-    doc.text('NOTA INICIAL OBLIGATORIA', margin + 3, y + 6);
-    doc.setFont(undefined, 'normal');
-    doc.setFontSize(10);
-    doc.text(splitText(doc, NOTE_TEXT, contentWidth - 6), margin + 3, y + 12);
-    y += boxHeight + 8;
-
-    addSection('1. Resumen', `Título, versión y fecha: ${placeholder(draftData.title)}. ${dateStr}. Justificación y contexto: ${placeholder(draftData.briefJustification)} Hipótesis y objetivos: ${placeholder(draftData.overallGoal)} Diseño del estudio: ${placeholder(draftData.studyType)}. Población: ${placeholder(values.population)}. Variables: ${placeholder(values.mainVariable)}. Fuentes de datos: ${values.personalData === 'Sí' ? 'Incluye datos personales/clínicos. Debe detallarse la base jurídica y las medidas de protección.' : 'Este apartado debe adaptarse según el tipo de estudio.'} Tamaño del estudio: ${draftData.sampleSizeGuidance?.intro || 'Este apartado debe adaptarse según el tipo de estudio.'} Análisis de datos: ${draftData.analysisPlan?.join(' ') || 'Pendiente de completar.'} Etapas y calendario: ${draftData.checklist?.[0] || 'Pendiente de completar.'}`);
-    addSection('2. Justificación y contexto', draftData.briefJustification);
-    addSection('3. Hipótesis y objetivos de la investigación', `3.1 Hipótesis: ${placeholder(draftData.question)} 3.2 Objetivos: 3.2.1 Objetivo principal: ${placeholder(draftData.overallGoal)} 3.2.2 Objetivos secundarios: ${(draftData.specificGoals || ['[Pendiente de completar por el investigador principal]']).join(' ')}`);
-    addSection('4. Diseño del estudio', `${placeholder(draftData.studyType)}. ${placeholder(draftData.designDescription)}`);
-    addSection('5. Población', `5.1 Criterios de inclusión: ${placeholder(values.population)}. 5.2 Criterios de exclusión: Este apartado debe adaptarse según el tipo de estudio.`);
-    addSection('6. Variables', (draftData.variablesSection || ['[Pendiente de completar por el investigador principal]']).join(' '));
-    addSection('7. Fuentes de los datos', values.personalData === 'Sí' ? 'Se prevé uso de datos personales o clínicos. Deben detallarse origen, acceso y medidas de anonimización o seudonimización.' : 'Este apartado debe adaptarse según el tipo de estudio.');
-    addSection('8. Análisis estadístico', (draftData.analysisPlan || ['[Pendiente de completar por el investigador principal]']).join(' '));
-    addSection('9. Etapas y calendario', 'Este apartado debe adaptarse según el tipo de estudio. [Pendiente de completar por el investigador principal]');
-    addSection('10. Gestión de los datos y control de calidad', 'Definir procedimientos de verificación, trazabilidad, almacenamiento seguro y revisión metodológica.');
-    addSection('11. Limitaciones de los métodos de investigación', (draftData.methodAlerts || ['Este apartado debe adaptarse según el tipo de estudio.']).join(' '));
-    addSection('12. Protección de las personas sometidas al estudio', `12.1 Evaluación beneficio/riesgo: ${draftData.ethicsAlerts?.[0] || 'Este apartado debe adaptarse según el tipo de estudio.'} 12.2 Información a los sujetos y consentimiento informado: ${values.vulnerable === 'Sí' ? 'Aplicar salvaguardas reforzadas y lenguaje accesible.' : 'Debe definirse el procedimiento específico.'} 12.3 Confidencialidad de los datos: ${values.personalData === 'Sí' ? 'Obligatorio plan de protección de datos.' : 'Este apartado debe adaptarse según el tipo de estudio.'} 12.4 Interferencias con los hábitos de prescripción, si aplica: Este apartado puede no aplicar según el tipo de estudio.`);
-    addSection('13. Gestión y notificación de reacciones adversas, si aplica', 'Este apartado debe adaptarse según el tipo de estudio y puede no aplicar en estudios sin intervención.');
-    addSection('14. Plan de trabajo', 'Definir fases, responsables y entregables. [Pendiente de completar por el investigador principal]');
-    addSection('15. Planes de difusión y comunicación de resultados', 'Especificar foros de difusión académica, criterios de autoría y estrategia de publicación.');
-    addSection('16. Bibliografía', 'Incluir referencias metodológicas y científicas actualizadas según normativa de citación aplicable.');
-
-    addHeaderFooter();
-    const filename = `protocolo_investigacion_${dateStr}.pdf`;
-    doc.save(filename);
-    return filename;
+    const m = 15, w = 180, h = 297;
+    let y = 20; let section = 1;
+    const ensure = (n=10)=>{ if (y+n>280){ doc.addPage(); y=20; }};
+    const p = (txt, sz=10)=>{ doc.setFontSize(sz); const l=doc.splitTextToSize(txt,w); ensure(l.length*5+3); doc.text(l,m,y); y+=l.length*5+3; };
+    const box = (title,text)=>{ ensure(28); doc.setFillColor(255,248,225); doc.roundedRect(m,y,w,22,2,2,'F'); doc.setFont(undefined,'bold'); doc.text(title,m+2,y+5); doc.setFont(undefined,'normal'); doc.setFontSize(9); doc.text(doc.splitTextToSize(text,w-4),m+2,y+10); y+=26; };
+    doc.setFont(undefined,'bold'); doc.setFontSize(18); doc.text('PROTOCOLO DE INVESTIGACIÓN',m,y); y+=10;
+    doc.setFontSize(12); doc.setFont(undefined,'normal'); p(`AyudaInvestigacion · ${new Date().toISOString().slice(0,10)}`); p(`Título: ${draftData.sections['Título']}`); p(`Investigador principal: ${draftData.sections['Investigador principal']}`);
+    box('Nota inicial obligatoria', NOTE_TEXT);
+    p('Índice / estructura',11); Object.keys(draftData.sections).forEach((k)=>p(`${section++}. ${k}`,9));
+    section = 1;
+    Object.entries(draftData.sections).forEach(([k,v])=>{ ensure(14); doc.setFont(undefined,'bold'); doc.setFontSize(12); doc.text(`${section}. ${k}`,m,y); y+=6; doc.setFont(undefined,'normal'); p(v,10); if(/ética|consentimiento|datos/i.test(k)) box('Advertencia', 'Revisar este apartado con tutor/CEI y normativa vigente antes de su uso.'); section+=1; });
+    ensure(20); doc.setFont(undefined,'bold'); doc.text('Checklist final',m,y); y+=6; doc.setFont(undefined,'normal'); draftData.checklist.forEach((c)=>p(`[ ] ${c}`,10));
+    p('Documentación que puede ser necesaria para el CEI',11);
+    p('Protocolo completo, hoja de información, consentimiento o exención, memoria económica si aplica, compromiso del IP, autorización del centro, CRD, dictamen CEI, póliza/seguro si aplica, protección de datos, CV abreviado.');
+    const pages = doc.getNumberOfPages();
+    for (let i=1;i<=pages;i+=1){ doc.setPage(i); doc.setFontSize(8); doc.text('AyudaInvestigacion',m,h-8); doc.text(`Página ${i}/${pages}`,195,h-8,{align:'right'}); }
+    doc.save(`protocolo_investigacion_${new Date().toISOString().slice(0,10)}.pdf`);
   };
 })();
